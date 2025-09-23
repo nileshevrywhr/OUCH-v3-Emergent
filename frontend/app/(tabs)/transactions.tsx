@@ -36,8 +36,6 @@ export default function TransactionsScreen() {
   const [showEditDatePicker, setShowEditDatePicker] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
 
-  const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
   const onRefresh = async () => {
     setRefreshing(true);
     await refreshData();
