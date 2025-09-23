@@ -299,9 +299,11 @@ export default function TransactionsScreen() {
           {item.totalAmount >= 0 ? '+' : ''}{formatCurrency(Math.abs(item.totalAmount))}
         </Text>
       </View>
-      {item.data.map((transaction: any) => 
-        renderTransaction({ item: transaction })
-      )}
+      {item.data.map((transaction: any) => (
+        <View key={transaction.id} style={{ marginVertical: 1 }}>
+          {renderTransaction({ item: transaction })}
+        </View>
+      ))}
     </View>
   );
 
