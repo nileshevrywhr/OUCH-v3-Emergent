@@ -202,6 +202,8 @@ export default function RootLayout() {
     settings,
     refreshData,
     addTransaction,
+    updateTransaction,
+    deleteTransaction,
     updateSettings,
   };
 
