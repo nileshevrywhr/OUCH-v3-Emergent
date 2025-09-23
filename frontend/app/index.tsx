@@ -228,6 +228,7 @@ export default function Index() {
         setDescription('');
         setSelectedCategory(null);
         setTransactionType('expense');
+        setSelectedDate(new Date());
       } else {
         throw new Error('Failed to add transaction');
       }
