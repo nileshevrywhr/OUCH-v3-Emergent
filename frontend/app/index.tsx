@@ -337,22 +337,6 @@ export default function Index() {
         >
           <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
             <View style={styles.content}>
-              {/* Voice Input Button */}
-              <TouchableOpacity
-                style={[styles.voiceButton, isListening && styles.voiceButtonActive]}
-                onPress={handleVoiceInput}
-                disabled={isListening}
-              >
-                <Ionicons 
-                  name={isListening ? "mic" : "mic-outline"} 
-                  size={32} 
-                  color={isListening ? "#fff" : "#FF6B6B"} 
-                />
-                <Text style={[styles.voiceButtonText, isListening && styles.voiceButtonTextActive]}>
-                  {isListening ? 'Listening...' : 'Tap to speak'}
-                </Text>
-              </TouchableOpacity>
-
               {/* Transaction Type Toggle */}
               <View style={styles.typeToggle}>
                 <TouchableOpacity
@@ -385,6 +369,42 @@ export default function Index() {
                     Income
                   </Text>
                 </TouchableOpacity>
+              </View>
+
+              {/* Date Picker */}
+              <View style={styles.inputContainer}>
+                <Text style={[styles.label, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                  Transaction Date
+                </Text>
+                <TouchableOpacity
+                  style={styles.dateSelector}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Ionicons name="calendar-outline" size={20} color="#666" />
+                  <Text style={[styles.dateText, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                    {selectedDate.toLocaleDateString('en-US', { 
+                      weekday: 'short', 
+                      month: 'short', 
+                      day: 'numeric', 
+                      year: 'numeric' 
+                    })}
+                  </Text>
+                  <Ionicons name="chevron-down" size={20} color="#666" />
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={selectedDate}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={(event, date) => {
+                      setShowDatePicker(Platform.OS === 'ios');
+                      if (date) {
+                        setSelectedDate(date);
+                      }
+                    }}
+                    maximumDate={new Date()}
+                  />
+                )}
               </View>
 
               {/* Amount Input */}
@@ -471,6 +491,22 @@ export default function Index() {
                 />
                 <Text style={styles.submitButtonText}>
                   Add {transactionType === 'expense' ? 'Expense' : 'Income'}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Voice Input Button - Moved to Bottom */}
+              <TouchableOpacity
+                style={[styles.voiceButtonBottom, isListening && styles.voiceButtonActive]}
+                onPress={handleVoiceInput}
+                disabled={isListening}
+              >
+                <Ionicons 
+                  name={isListening ? "mic" : "mic-outline"} 
+                  size={28} 
+                  color={isListening ? "#fff" : "#FF6B6B"} 
+                />
+                <Text style={[styles.voiceButtonText, isListening && styles.voiceButtonTextActive]}>
+                  {isListening ? 'Listening...' : 'Tap to speak'}
                 </Text>
               </TouchableOpacity>
 
