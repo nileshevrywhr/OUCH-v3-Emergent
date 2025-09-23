@@ -337,7 +337,7 @@ export default function SettingsScreen() {
                 placeholder="Enter category name..."
                 placeholderTextColor="#999"
               />
-            </div>
+            </View>
 
             {renderColorPicker()}
 
