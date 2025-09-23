@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Import screens
-import HomeScreen from './screens/HomeScreen';
+import DashboardScreen from './screens/DashboardScreen';
 import AddExpenseScreen from './screens/HomeScreen';
 import SettingsScreen from './screens/SettingsScreen';
 
