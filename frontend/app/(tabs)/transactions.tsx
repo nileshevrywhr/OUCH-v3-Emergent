@@ -173,50 +173,99 @@ export default function TransactionsScreen() {
     }
   };
 
+  // Right swipe action (Edit) 
+  const renderRightAction = (item: any, dragX: Animated.AnimatedAddition) => {
+    const scale = dragX.interpolate({
+      inputRange: [0, 100],
+      outputRange: [0, 1],
+      extrapolate: 'clamp',
+    });
+    
+    return (
+      <TouchableOpacity
+        style={styles.editAction}
+        onPress={() => handleEditTransaction(item)}
+      >
+        <Animated.View style={[styles.actionButton, { transform: [{ scale }] }]}>
+          <Ionicons name="create-outline" size={24} color="#fff" />
+          <Text style={styles.actionText}>Edit</Text>
+        </Animated.View>
+      </TouchableOpacity>
+    );
+  };
+
+  // Left swipe action (Delete)
+  const renderLeftAction = (item: any, dragX: Animated.AnimatedAddition) => {
+    const scale = dragX.interpolate({
+      inputRange: [-100, 0],
+      outputRange: [1, 0],
+      extrapolate: 'clamp',
+    });
+    
+    return (
+      <TouchableOpacity
+        style={styles.deleteAction}
+        onPress={() => handleDeleteTransaction(item)}
+      >
+        <Animated.View style={[styles.actionButton, { transform: [{ scale }] }]}>
+          <Ionicons name="trash-outline" size={24} color="#fff" />
+          <Text style={styles.actionText}>Delete</Text>
+        </Animated.View>
+      </TouchableOpacity>
+    );
+  };
+
   const renderTransaction = ({ item }: { item: any }) => (
-    <View style={[styles.transactionItem, { backgroundColor: settings.dark_mode ? '#1e1e1e' : '#fff' }]}>
-      <View style={styles.transactionLeft}>
-        <View style={[
-          styles.categoryIndicator,
-          { backgroundColor: item.transaction_type === 'income' ? '#4ECDC4' : '#FF6B6B' }
-        ]}>
-          <Ionicons 
-            name={item.transaction_type === 'income' ? 'arrow-up' : 'arrow-down'} 
-            size={16} 
-            color="#fff" 
-          />
-        </View>
-        <View style={styles.transactionDetails}>
-          <Text style={[styles.transactionCategory, { color: settings.dark_mode ? '#fff' : '#333' }]}>
-            {item.category_name}
-          </Text>
-          <Text style={styles.transactionDate}>
-            {formatDate(item.transaction_date)}
-          </Text>
-          {item.description && (
-            <Text style={styles.transactionDescription} numberOfLines={2}>
-              {item.description}
+    <Swipeable
+      renderRightAction={(dragX) => renderRightAction(item, dragX)}
+      renderLeftAction={(dragX) => renderLeftAction(item, dragX)}
+      rightThreshold={40}
+      leftThreshold={40}
+    >
+      <View style={[styles.transactionItem, { backgroundColor: settings.dark_mode ? '#1e1e1e' : '#fff' }]}>
+        <View style={styles.transactionLeft}>
+          <View style={[
+            styles.categoryIndicator,
+            { backgroundColor: item.transaction_type === 'income' ? '#4ECDC4' : '#FF6B6B' }
+          ]}>
+            <Ionicons 
+              name={item.transaction_type === 'income' ? 'arrow-up' : 'arrow-down'} 
+              size={16} 
+              color="#fff" 
+            />
+          </View>
+          <View style={styles.transactionDetails}>
+            <Text style={[styles.transactionCategory, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+              {item.category_name}
             </Text>
-          )}
+            <Text style={styles.transactionDate}>
+              {formatDate(item.transaction_date)}
+            </Text>
+            {item.description && (
+              <Text style={styles.transactionDescription} numberOfLines={2}>
+                {item.description}
+              </Text>
+            )}
+          </View>
         </View>
-      </View>
-      <View style={styles.transactionRight}>
-        <Text style={[
-          styles.transactionAmount,
-          { color: item.transaction_type === 'income' ? '#4ECDC4' : '#FF6B6B' }
-        ]}>
-          {item.transaction_type === 'income' ? '+' : '-'}{formatCurrency(item.amount)}
-        </Text>
-        <View style={styles.transactionMeta}>
-          {item.is_voice_input && (
-            <Ionicons name="mic" size={12} color="#999" style={styles.voiceIcon} />
-          )}
-          <Text style={styles.transactionCurrency}>
-            {item.currency}
+        <View style={styles.transactionRight}>
+          <Text style={[
+            styles.transactionAmount,
+            { color: item.transaction_type === 'income' ? '#4ECDC4' : '#FF6B6B' }
+          ]}>
+            {item.transaction_type === 'income' ? '+' : '-'}{formatCurrency(item.amount)}
           </Text>
+          <View style={styles.transactionMeta}>
+            {item.is_voice_input && (
+              <Ionicons name="mic" size={12} color="#999" style={styles.voiceIcon} />
+            )}
+            <Text style={styles.transactionCurrency}>
+              {item.currency}
+            </Text>
+          </View>
         </View>
       </View>
-    </View>
+    </Swipeable>
   );
 
   const renderEmptyState = () => (
