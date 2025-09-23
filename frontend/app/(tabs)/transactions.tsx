@@ -25,6 +25,9 @@ export default function TransactionsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'7' | '30' | 90 | 'all'>('all');
   
+  // Refs for gesture handling
+  const swipeableRefs = useRef<{ [key: string]: Swipeable | null }>({});
+  
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
