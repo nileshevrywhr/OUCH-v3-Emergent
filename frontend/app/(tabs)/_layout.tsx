@@ -13,7 +13,9 @@ export default function TabsLayout() {
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap;
 
-          if (route.name === 'home') {
+          if (route.name === 'transactions') {
+            iconName = focused ? 'receipt' : 'receipt-outline';
+          } else if (route.name === 'home') {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'add') {
             iconName = focused ? 'add-circle' : 'add-circle-outline';
