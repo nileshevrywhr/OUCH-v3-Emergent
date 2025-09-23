@@ -94,7 +94,6 @@ export default function Index() {
 
   const refreshData = async () => {
     try {
-      // Fetch categories
       const categoriesResponse = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/categories`);
       if (categoriesResponse.ok) {
         const categoriesData = await categoriesResponse.json();
@@ -102,7 +101,6 @@ export default function Index() {
         await AsyncStorage.setItem('categories', JSON.stringify(categoriesData));
       }
 
-      // Fetch recent transactions
       const transactionsResponse = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/transactions?limit=100`);
       if (transactionsResponse.ok) {
         const transactionsData = await transactionsResponse.json();
@@ -111,16 +109,46 @@ export default function Index() {
       }
     } catch (error) {
       console.error('Error fetching data:', error);
-      // Load from local storage as fallback
       try {
         const localCategories = await AsyncStorage.getItem('categories');
         const localTransactions = await AsyncStorage.getItem('transactions');
-        
         if (localCategories) setCategories(JSON.parse(localCategories));
         if (localTransactions) setTransactions(JSON.parse(localTransactions));
       } catch (localError) {
         console.error('Error loading local data:', localError);
       }
+    }
+  };
+
+  const addTransaction = async (transactionData: Omit<Transaction, 'id' | 'created_at'>) => {
+    try {
+      const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/transactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(transactionData),
+      });
+
+      if (response.ok) {
+        const newTransaction = await response.json();
+        setTransactions(prev => [newTransaction, ...prev]);
+        const updatedTransactions = [newTransaction, ...transactions];
+        await AsyncStorage.setItem('transactions', JSON.stringify(updatedTransactions));
+      } else {
+        throw new Error('Failed to add transaction');
+      }
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+      throw error;
+    }
+  };
+
+  const updateSettings = async (newSettings: Partial<AppSettings>) => {
+    try {
+      const updatedSettings = { ...settings, ...newSettings };
+      setSettings(updatedSettings);
+      await AsyncStorage.setItem('app_settings', JSON.stringify(updatedSettings));
+    } catch (error) {
+      console.error('Error updating settings:', error);
     }
   };
 
