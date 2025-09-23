@@ -27,6 +27,15 @@ export default function TransactionsScreen() {
   
   // Refs for gesture handling
   const swipeableRefs = useRef<{ [key: string]: Swipeable | null }>({});
+
+  // Function to close all open swipeable items except the current one
+  const closeAllSwipeables = (exceptId?: string) => {
+    Object.keys(swipeableRefs.current).forEach((id) => {
+      if (id !== exceptId && swipeableRefs.current[id]) {
+        swipeableRefs.current[id]?.close();
+      }
+    });
+  };
   
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
