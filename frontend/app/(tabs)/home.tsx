@@ -421,17 +421,8 @@ const styles = StyleSheet.create({
   bottomSpacing: {
     height: 20,
   },
-  section: {
-    paddingHorizontal: 16,
-    marginBottom: 24,
-  },
   sectionHeader: {
     marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 12,
   },
   sortContainer: {
     flexDirection: 'row',
