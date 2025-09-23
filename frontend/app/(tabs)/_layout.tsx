@@ -46,6 +46,13 @@ export default function TabsLayout() {
       })}
     >
       <Tabs.Screen
+        name="transactions"
+        options={{
+          title: 'Transactions',
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
         name="home"
         options={{
           title: 'Dashboard',
