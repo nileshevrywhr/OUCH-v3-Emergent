@@ -171,9 +171,11 @@ export default function RootLayout() {
       });
 
       if (response.ok) {
-        setTransactions(prev => prev.filter(t => t.id !== id));
-        const updatedTransactions = transactions.filter(t => t.id !== id);
-        await AsyncStorage.setItem('transactions', JSON.stringify(updatedTransactions));
+        setTransactions(prev => {
+          const updated = prev.filter(t => t.id !== id);
+          AsyncStorage.setItem('transactions', JSON.stringify(updated));
+          return updated;
+        });
       } else {
         throw new Error('Failed to delete transaction');
       }
