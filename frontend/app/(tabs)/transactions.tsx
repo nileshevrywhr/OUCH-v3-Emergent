@@ -305,8 +305,7 @@ export default function TransactionsScreen() {
   );
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={[styles.container, { backgroundColor: settings.dark_mode ? '#121212' : '#f8f9fa' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: settings.dark_mode ? '#121212' : '#f8f9fa' }]}>
         <View style={styles.header}>
           <Text style={[styles.headerTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
             Transactions
