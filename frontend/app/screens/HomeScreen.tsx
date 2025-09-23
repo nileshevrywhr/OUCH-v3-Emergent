@@ -15,7 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
-import { AppContext, Category } from '../index';
+import { AppContext, Category } from '../_layout';
 
 export default function HomeScreen() {
   const { categories, addTransaction, settings } = useContext(AppContext);
