@@ -152,7 +152,98 @@ export default function Index() {
     }
   };
 
-  const handleVoiceInput = async () => {
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading ExpenseTracker...</Text>
+      </View>
+    );
+  }
+
+  const contextValue = {
+    transactions,
+    categories,
+    settings,
+    refreshData,
+    addTransaction,
+    updateSettings,
+  };
+
+  return (
+    <SafeAreaProvider>
+      <AppContext.Provider value={contextValue}>
+        <NavigationContainer>
+          <StatusBar style={settings.dark_mode ? "light" : "dark"} />
+          <Tab.Navigator
+            screenOptions={({ route }) => ({
+              tabBarIcon: ({ focused, color, size }) => {
+                let iconName: keyof typeof Ionicons.glyphMap;
+                
+                if (route.name === 'Home') {
+                  iconName = focused ? 'home' : 'home-outline';
+                } else if (route.name === 'Add') {
+                  iconName = focused ? 'add-circle' : 'add-circle-outline';
+                } else if (route.name === 'Settings') {
+                  iconName = focused ? 'settings' : 'settings-outline';
+                } else {
+                  iconName = 'help-circle-outline';
+                }
+
+                return <Ionicons name={iconName} size={size} color={color} />;
+              },
+              tabBarActiveTintColor: '#FF6B6B',
+              tabBarInactiveTintColor: 'gray',
+              tabBarStyle: {
+                backgroundColor: settings.dark_mode ? '#1a1a1a' : '#ffffff',
+                borderTopColor: settings.dark_mode ? '#333' : '#e0e0e0',
+                height: 80,
+                paddingBottom: 20,
+                paddingTop: 10,
+              },
+              headerStyle: {
+                backgroundColor: settings.dark_mode ? '#1a1a1a' : '#ffffff',
+              },
+              headerTintColor: settings.dark_mode ? '#ffffff' : '#000000',
+              headerTitleStyle: {
+                fontWeight: '600',
+              },
+            })}
+          >
+            <Tab.Screen 
+              name="Home" 
+              component={HomeScreen}
+              options={{ title: 'Dashboard' }}
+            />
+            <Tab.Screen 
+              name="Add" 
+              component={AddExpenseScreen}
+              options={{ title: 'Add Expense' }}
+            />
+            <Tab.Screen 
+              name="Settings" 
+              component={SettingsScreen}
+              options={{ title: 'Settings' }}
+            />
+          </Tab.Navigator>
+        </NavigationContainer>
+      </AppContext.Provider>
+    </SafeAreaProvider>
+  );
+}
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+  },
+  loadingText: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#666',
+  },
+});
     if (!settings.voice_enabled) {
       Alert.alert('Voice Input Disabled', 'Enable voice input in settings to use this feature.');
       return;
