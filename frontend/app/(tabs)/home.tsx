@@ -159,10 +159,6 @@ export default function HomeScreen() {
       transactionCount: monthlyTransactions.length,
     };
   }, [transactions]);
-
-  const formatCurrency = (amount: number) => {
-    const symbol = settings.default_currency === 'INR' ? '₹' : '$';
-    return `${symbol}${amount.toLocaleString()}`;
   };
 
   const formatDate = (dateString: string) => {
