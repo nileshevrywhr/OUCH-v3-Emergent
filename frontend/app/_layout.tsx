@@ -209,14 +209,16 @@ export default function RootLayout() {
   };
 
   return (
-    <SafeAreaProvider>
-      <AppContext.Provider value={contextValue}>
-        <StatusBar style={settings.dark_mode ? "light" : "dark"} />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
-      </AppContext.Provider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <AppContext.Provider value={contextValue}>
+          <StatusBar style={settings.dark_mode ? "light" : "dark"} />
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
+        </AppContext.Provider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 
