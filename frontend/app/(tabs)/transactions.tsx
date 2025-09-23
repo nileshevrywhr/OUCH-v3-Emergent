@@ -216,9 +216,9 @@ export default function TransactionsScreen() {
           </View>
         </View>
         
-        {/* Action buttons shown when selected */}
+        {/* Action buttons overlay when selected */}
         {isSelected && (
-          <View style={styles.actionButtons}>
+          <View style={styles.actionOverlay}>
             <TouchableOpacity
               style={styles.editButton}
               onPress={() => {
