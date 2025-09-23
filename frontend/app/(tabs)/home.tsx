@@ -421,4 +421,83 @@ const styles = StyleSheet.create({
   bottomSpacing: {
     height: 20,
   },
+  section: {
+    paddingHorizontal: 16,
+    marginBottom: 24,
+  },
+  sectionHeader: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  sortContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  sortButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  sortButtonActive: {
+    borderColor: '#FF6B6B',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  sortButtonText: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginLeft: 4,
+  },
+  categoryItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    marginVertical: 4,
+    borderRadius: 12,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  categoryLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  categoryDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  categoryInfo: {
+    flex: 1,
+  },
+  categoryName: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  categoryMeta: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
+  },
+  categoryAmount: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
 });
