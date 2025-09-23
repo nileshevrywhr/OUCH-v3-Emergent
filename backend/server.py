@@ -173,10 +173,9 @@ async def create_transaction(transaction_data: TransactionCreate):
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
     
-    transaction = Transaction(
-        **transaction_data.dict(),
-        category_name=category["name"]
-    )
+    transaction_dict = transaction_data.dict()
+    transaction_dict["category_name"] = category["name"]
+    transaction = Transaction(**transaction_dict)
     result = await db.transactions.insert_one(transaction.dict())
     return transaction
 
