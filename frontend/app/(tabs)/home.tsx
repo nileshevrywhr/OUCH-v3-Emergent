@@ -102,6 +102,11 @@ export default function HomeScreen() {
     return colors[Math.abs(hash) % colors.length];
   };
 
+  const formatCurrency = (amount: number) => {
+    const symbol = settings.default_currency === 'INR' ? '₹' : '$';
+    return `${symbol}${amount.toLocaleString()}`;
+  };
+
   const getSortIcon = (option: SortOption) => {
     switch (option) {
       case 'amount_desc':
