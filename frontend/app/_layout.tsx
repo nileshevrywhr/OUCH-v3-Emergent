@@ -126,9 +126,11 @@ export default function RootLayout() {
 
       if (response.ok) {
         const newTransaction = await response.json();
-        setTransactions(prev => [newTransaction, ...prev]);
-        const updatedTransactions = [newTransaction, ...transactions];
-        await AsyncStorage.setItem('transactions', JSON.stringify(updatedTransactions));
+        setTransactions(prev => {
+          const updated = [newTransaction, ...prev];
+          AsyncStorage.setItem('transactions', JSON.stringify(updated));
+          return updated;
+        });
       } else {
         throw new Error('Failed to add transaction');
       }
