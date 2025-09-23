@@ -328,55 +328,260 @@ export default function TransactionsScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: settings.dark_mode ? '#121212' : '#f8f9fa' }]}>
-      <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
-          Transactions
-        </Text>
-        <Text style={[styles.headerSubtitle, { color: settings.dark_mode ? '#ccc' : '#666' }]}>
-          {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? 's' : ''}
-        </Text>
-      </View>
-
-      {/* Period Filter */}
-      <View style={styles.filterContainer}>
-        <View style={styles.periodSelector}>
-          {(['7', '30', '90', 'all'] as const).map((period) => (
-            <TouchableOpacity
-              key={period}
-              style={[
-                styles.periodButton,
-                selectedPeriod === period && styles.periodButtonActive,
-                { 
-                  backgroundColor: selectedPeriod === period ? '#FF6B6B' : (settings.dark_mode ? '#1e1e1e' : '#fff')
-                }
-              ]}
-              onPress={() => setSelectedPeriod(period)}
-            >
-              <Text style={[
-                styles.periodButtonText,
-                { color: selectedPeriod === period ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }
-              ]}>
-                {period === 'all' ? 'All' : `${period}d`}
-              </Text>
-            </TouchableOpacity>
-          ))}
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={[styles.container, { backgroundColor: settings.dark_mode ? '#121212' : '#f8f9fa' }]}>
+        <View style={styles.header}>
+          <Text style={[styles.headerTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+            Transactions
+          </Text>
+          <Text style={[styles.headerSubtitle, { color: settings.dark_mode ? '#ccc' : '#666' }]}>
+            {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? 's' : ''}
+          </Text>
         </View>
-      </View>
 
-      {/* Transactions List */}
-      <FlatList
-        data={groupedTransactions}
-        renderItem={renderDateGroup}
-        keyExtractor={(item) => item.date}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        ListEmptyComponent={renderEmptyState}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={filteredTransactions.length === 0 ? styles.emptyContainer : undefined}
-      />
-    </SafeAreaView>
+        {/* Period Filter */}
+        <View style={styles.filterContainer}>
+          <View style={styles.periodSelector}>
+            {(['7', '30', '90', 'all'] as const).map((period) => (
+              <TouchableOpacity
+                key={period}
+                style={[
+                  styles.periodButton,
+                  selectedPeriod === period && styles.periodButtonActive,
+                  { 
+                    backgroundColor: selectedPeriod === period ? '#FF6B6B' : (settings.dark_mode ? '#1e1e1e' : '#fff')
+                  }
+                ]}
+                onPress={() => setSelectedPeriod(period)}
+              >
+                <Text style={[
+                  styles.periodButtonText,
+                  { color: selectedPeriod === period ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }
+                ]}>
+                  {period === 'all' ? 'All' : `${period}d`}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Transactions List */}
+        <FlatList
+          data={groupedTransactions}
+          renderItem={renderDateGroup}
+          keyExtractor={(item) => item.date}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          ListEmptyComponent={renderEmptyState}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={filteredTransactions.length === 0 ? styles.emptyContainer : undefined}
+        />
+
+        {/* Edit Transaction Modal */}
+        <Modal
+          visible={showEditModal}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => setShowEditModal(false)}
+        >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ flex: 1 }}
+          >
+            <SafeAreaView style={[styles.modalContainer, { backgroundColor: settings.dark_mode ? '#121212' : '#fff' }]}>
+              <View style={styles.modalHeader}>
+                <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                  <Text style={[styles.modalCancelButton, { color: settings.dark_mode ? '#ccc' : '#666' }]}>
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+                <Text style={[styles.modalTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                  Edit Transaction
+                </Text>
+                <TouchableOpacity onPress={handleSaveEdit}>
+                  <Text style={styles.modalSaveButton}>Save</Text>
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView style={styles.modalContent}>
+                {/* Amount Input */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                    Amount
+                  </Text>
+                  <View style={styles.amountContainer}>
+                    <TouchableOpacity
+                      style={[
+                        styles.typeButton,
+                        editType === 'expense' && styles.typeButtonActive,
+                        { backgroundColor: editType === 'expense' ? '#FF6B6B' : (settings.dark_mode ? '#1e1e1e' : '#f0f0f0') }
+                      ]}
+                      onPress={() => setEditType('expense')}
+                    >
+                      <Text style={[styles.typeButtonText, { color: editType === 'expense' ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }]}>
+                        Expense
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.typeButton,
+                        editType === 'income' && styles.typeButtonActive,
+                        { backgroundColor: editType === 'income' ? '#4ECDC4' : (settings.dark_mode ? '#1e1e1e' : '#f0f0f0') }
+                      ]}
+                      onPress={() => setEditType('income')}
+                    >
+                      <Text style={[styles.typeButtonText, { color: editType === 'income' ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }]}>
+                        Income
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  <TextInput
+                    style={[
+                      styles.amountInput,
+                      { 
+                        backgroundColor: settings.dark_mode ? '#1e1e1e' : '#f8f9fa',
+                        color: settings.dark_mode ? '#fff' : '#333',
+                        borderColor: editType === 'income' ? '#4ECDC4' : '#FF6B6B'
+                      }
+                    ]}
+                    value={editAmount}
+                    onChangeText={setEditAmount}
+                    placeholder="Enter amount"
+                    placeholderTextColor={settings.dark_mode ? '#666' : '#999'}
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                {/* Category Selection */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                    Category
+                  </Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.categoryButton,
+                      { backgroundColor: settings.dark_mode ? '#1e1e1e' : '#f8f9fa' }
+                    ]}
+                    onPress={() => setShowCategoryModal(true)}
+                  >
+                    <Text style={[styles.categoryButtonText, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                      {editCategory ? editCategory.name : 'Select Category'}
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color={settings.dark_mode ? '#fff' : '#333'} />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Date Selection */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                    Date
+                  </Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.dateButton,
+                      { backgroundColor: settings.dark_mode ? '#1e1e1e' : '#f8f9fa' }
+                    ]}
+                    onPress={() => setShowEditDatePicker(true)}
+                  >
+                    <Text style={[styles.dateButtonText, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                      {editDate.toLocaleDateString()}
+                    </Text>
+                    <Ionicons name="calendar-outline" size={20} color={settings.dark_mode ? '#fff' : '#333'} />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Description */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                    Description (Optional)
+                  </Text>
+                  <TextInput
+                    style={[
+                      styles.descriptionInput,
+                      { 
+                        backgroundColor: settings.dark_mode ? '#1e1e1e' : '#f8f9fa',
+                        color: settings.dark_mode ? '#fff' : '#333'
+                      }
+                    ]}
+                    value={editDescription}
+                    onChangeText={setEditDescription}
+                    placeholder="Add a note..."
+                    placeholderTextColor={settings.dark_mode ? '#666' : '#999'}
+                    multiline
+                  />
+                </View>
+              </ScrollView>
+
+              {/* Date Picker */}
+              {showEditDatePicker && (
+                <DateTimePicker
+                  value={editDate}
+                  mode="date"
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    setShowEditDatePicker(false);
+                    if (selectedDate) {
+                      setEditDate(selectedDate);
+                    }
+                  }}
+                />
+              )}
+
+              {/* Category Modal */}
+              <Modal
+                visible={showCategoryModal}
+                animationType="slide"
+                presentationStyle="pageSheet"
+                onRequestClose={() => setShowCategoryModal(false)}
+              >
+                <SafeAreaView style={[styles.modalContainer, { backgroundColor: settings.dark_mode ? '#121212' : '#fff' }]}>
+                  <View style={styles.modalHeader}>
+                    <TouchableOpacity onPress={() => setShowCategoryModal(false)}>
+                      <Text style={[styles.modalCancelButton, { color: settings.dark_mode ? '#ccc' : '#666' }]}>
+                        Cancel
+                      </Text>
+                    </TouchableOpacity>
+                    <Text style={[styles.modalTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                      Select Category
+                    </Text>
+                    <View style={{ width: 60 }} />
+                  </View>
+                  <FlatList
+                    data={categories}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        style={[
+                          styles.categoryItem,
+                          { backgroundColor: settings.dark_mode ? '#1e1e1e' : '#f8f9fa' },
+                          editCategory?.id === item.id && styles.categoryItemSelected
+                        ]}
+                        onPress={() => {
+                          setEditCategory(item);
+                          setShowCategoryModal(false);
+                        }}
+                      >
+                        <Text style={[
+                          styles.categoryItemText,
+                          { color: settings.dark_mode ? '#fff' : '#333' },
+                          editCategory?.id === item.id && styles.categoryItemTextSelected
+                        ]}>
+                          {item.name}
+                        </Text>
+                        {editCategory?.id === item.id && (
+                          <Ionicons name="checkmark" size={20} color="#FF6B6B" />
+                        )}
+                      </TouchableOpacity>
+                    )}
+                  />
+                </SafeAreaView>
+              </Modal>
+            </SafeAreaView>
+          </KeyboardAvoidingView>
+        </Modal>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
