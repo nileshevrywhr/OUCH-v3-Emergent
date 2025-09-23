@@ -430,40 +430,6 @@ export default function Index() {
         >
           <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
             <View style={styles.content}>
-              {/* Transaction Type Toggle */}
-              <View style={styles.typeToggle}>
-                <TouchableOpacity
-                  style={[
-                    styles.typeButton,
-                    transactionType === 'expense' && styles.typeButtonActive,
-                    { backgroundColor: transactionType === 'expense' ? '#FF6B6B' : '#e0e0e0' }
-                  ]}
-                  onPress={() => setTransactionType('expense')}
-                >
-                  <Text style={[
-                    styles.typeButtonText,
-                    { color: transactionType === 'expense' ? '#fff' : '#666' }
-                  ]}>
-                    Expense
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.typeButton,
-                    transactionType === 'income' && styles.typeButtonActive,
-                    { backgroundColor: transactionType === 'income' ? '#4ECDC4' : '#e0e0e0' }
-                  ]}
-                  onPress={() => setTransactionType('income')}
-                >
-                  <Text style={[
-                    styles.typeButtonText,
-                    { color: transactionType === 'income' ? '#fff' : '#666' }
-                  ]}>
-                    Income
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
               {/* Date Picker */}
               <View style={styles.inputContainer}>
                 <Text style={[styles.label, { color: settings.dark_mode ? '#fff' : '#333' }]}>
@@ -500,13 +466,53 @@ export default function Index() {
                 )}
               </View>
 
-              {/* Amount Input */}
+              {/* Amount Input with Type Toggle */}
               <View style={styles.inputContainer}>
-                <Text style={[styles.label, { color: settings.dark_mode ? '#fff' : '#333' }]}>
-                  Amount ({settings.default_currency})
-                </Text>
+                <View style={styles.amountLabelRow}>
+                  <Text style={[styles.label, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                    Amount ({settings.default_currency})
+                  </Text>
+                  
+                  {/* Compact Type Toggle */}
+                  <View style={styles.compactTypeToggle}>
+                    <TouchableOpacity
+                      style={[
+                        styles.compactTypeButton,
+                        transactionType === 'expense' && styles.compactTypeButtonActive,
+                        { backgroundColor: transactionType === 'expense' ? '#FF6B6B' : '#f0f0f0' }
+                      ]}
+                      onPress={() => setTransactionType('expense')}
+                    >
+                      <Text style={[
+                        styles.compactTypeButtonText,
+                        { color: transactionType === 'expense' ? '#fff' : '#666' }
+                      ]}>
+                        Expense
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.compactTypeButton,
+                        transactionType === 'income' && styles.compactTypeButtonActive,
+                        { backgroundColor: transactionType === 'income' ? '#4ECDC4' : '#f0f0f0' }
+                      ]}
+                      onPress={() => setTransactionType('income')}
+                    >
+                      <Text style={[
+                        styles.compactTypeButtonText,
+                        { color: transactionType === 'income' ? '#fff' : '#666' }
+                      ]}>
+                        Income
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                
                 <View style={styles.amountInputContainer}>
-                  <Text style={styles.currencySymbol}>
+                  <Text style={[
+                    styles.currencySymbol,
+                    { color: transactionType === 'expense' ? '#FF6B6B' : '#4ECDC4' }
+                  ]}>
                     {settings.default_currency === 'INR' ? '₹' : '$'}
                   </Text>
                   <TextInput
