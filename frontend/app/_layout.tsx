@@ -42,6 +42,8 @@ export const AppContext = React.createContext<{
   settings: AppSettings;
   refreshData: () => void;
   addTransaction: (transaction: Omit<Transaction, 'id' | 'created_at'>) => Promise<void>;
+  updateTransaction: (id: string, transaction: Partial<Transaction>) => Promise<void>;
+  deleteTransaction: (id: string) => Promise<void>;
   updateSettings: (newSettings: Partial<AppSettings>) => Promise<void>;
 }>({
   transactions: [],
@@ -49,6 +51,8 @@ export const AppContext = React.createContext<{
   settings: { default_currency: 'INR', dark_mode: false, voice_enabled: true, sync_enabled: false },
   refreshData: () => {},
   addTransaction: async () => {},
+  updateTransaction: async () => {},
+  deleteTransaction: async () => {},
   updateSettings: async () => {},
 });
 
