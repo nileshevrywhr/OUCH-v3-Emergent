@@ -153,52 +153,9 @@ export default function TransactionsScreen() {
     }
   };
 
-  // Right swipe action (Edit) 
-  const renderRightAction = (item: any, dragX: Animated.AnimatedAddition) => {
-    const scale = dragX.interpolate({
-      inputRange: [0, 80],
-      outputRange: [0, 1],
-      extrapolate: 'clamp',
-    });
-    
-    return (
-      <TouchableOpacity
-        style={styles.editAction}
-        onPress={() => {
-          closeAllSwipeables();
-          handleEditTransaction(item);
-        }}
-      >
-        <Animated.View style={[styles.actionButton, { transform: [{ scale }] }]}>
-          <Ionicons name="create-outline" size={24} color="#fff" />
-          <Text style={styles.actionText}>Edit</Text>
-        </Animated.View>
-      </TouchableOpacity>
-    );
-  };
-
-  // Left swipe action (Delete)
-  const renderLeftAction = (item: any, dragX: Animated.AnimatedAddition) => {
-    const scale = dragX.interpolate({
-      inputRange: [-80, 0],
-      outputRange: [1, 0],
-      extrapolate: 'clamp',
-    });
-    
-    return (
-      <TouchableOpacity
-        style={styles.deleteAction}
-        onPress={() => {
-          closeAllSwipeables();
-          handleDeleteTransaction(item);
-        }}
-      >
-        <Animated.View style={[styles.actionButton, { transform: [{ scale }] }]}>
-          <Ionicons name="trash-outline" size={24} color="#fff" />
-          <Text style={styles.actionText}>Delete</Text>
-        </Animated.View>
-      </TouchableOpacity>
-    );
+  // Handle long press to show actions
+  const handleLongPress = (transactionId: string) => {
+    setSelectedTransactionId(selectedTransactionId === transactionId ? null : transactionId);
   };
 
   const renderTransaction = ({ item }: { item: any }) => (
