@@ -204,6 +204,10 @@ async def update_transaction(transaction_id: str, transaction_data: TransactionC
     update_data = transaction_data.dict()
     update_data["category_name"] = category["name"]
     
+    # Convert date to string for MongoDB storage
+    if isinstance(update_data["transaction_date"], date):
+        update_data["transaction_date"] = update_data["transaction_date"].isoformat()
+    
     result = await db.transactions.update_one(
         {"id": transaction_id},
         {"$set": update_data}
