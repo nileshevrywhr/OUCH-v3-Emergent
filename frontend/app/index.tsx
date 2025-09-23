@@ -704,6 +704,22 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderWidth: 1,
   },
+  dateSelector: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  dateText: {
+    fontSize: 16,
+    fontWeight: '500',
+    flex: 1,
+    marginLeft: 12,
+  },
   selectedCategory: {
     flexDirection: 'row',
     alignItems: 'center',
