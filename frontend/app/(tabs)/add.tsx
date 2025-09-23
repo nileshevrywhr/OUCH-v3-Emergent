@@ -81,6 +81,19 @@ export default function AddExpenseScreen() {
     }
   };
 
+  const handleWebVoiceFallback = () => {
+    const sampleInputs = [
+      'Spent 500 rupees on groceries',
+      'Earned 2000 dollars from freelancing', 
+      'Paid 150 for utilities',
+      'Bought coffee for 80 rupees'
+    ];
+    
+    const randomInput = sampleInputs[Math.floor(Math.random() * sampleInputs.length)];
+    setDescription(randomInput);
+    Alert.alert('Voice Input Simulated', `Added: "${randomInput}"`);
+  };
+
   const handleVoiceInput = async () => {
     if (!settings.voice_enabled) {
       Alert.alert('Voice Input Disabled', 'Enable voice input in settings to use this feature.');
