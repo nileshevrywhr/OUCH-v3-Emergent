@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { AppContext } from '../index';
+import { AppContext } from '../_layout';
 
 export default function HomeScreen() {
   const { transactions, refreshData, settings } = useContext(AppContext);
