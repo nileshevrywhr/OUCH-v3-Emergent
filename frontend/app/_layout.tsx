@@ -4,7 +4,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack } from 'expo-router';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // Types
 export interface Transaction {
