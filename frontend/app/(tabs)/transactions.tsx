@@ -1,0 +1,372 @@
+import React, { useContext, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  RefreshControl,
+  TouchableOpacity,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { AppContext } from '../_layout';
+
+export default function TransactionsScreen() {
+  const { transactions, refreshData, settings } = useContext(AppContext);
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState<'7' | '30' | 90 | 'all'>('all');
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refreshData();
+    setRefreshing(false);
+  };
+
+  // Filter transactions by selected period
+  const getFilteredTransactions = () => {
+    if (selectedPeriod === 'all') {
+      return transactions;
+    }
+    
+    const days = parseInt(selectedPeriod.toString());
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    
+    return transactions.filter(t => 
+      new Date(t.transaction_date) >= cutoffDate
+    );
+  };
+
+  const filteredTransactions = getFilteredTransactions();
+
+  const formatCurrency = (amount: number) => {
+    const symbol = settings.default_currency === 'INR' ? '₹' : '$';
+    return `${symbol}${amount.toLocaleString()}`;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined,
+      });
+    }
+  };
+
+  const renderTransaction = ({ item }: { item: any }) => (
+    <View style={[styles.transactionItem, { backgroundColor: settings.dark_mode ? '#1e1e1e' : '#fff' }]}>
+      <View style={styles.transactionLeft}>
+        <View style={[
+          styles.categoryIndicator,
+          { backgroundColor: item.transaction_type === 'income' ? '#4ECDC4' : '#FF6B6B' }
+        ]}>
+          <Ionicons 
+            name={item.transaction_type === 'income' ? 'arrow-up' : 'arrow-down'} 
+            size={16} 
+            color="#fff" 
+          />
+        </View>
+        <View style={styles.transactionDetails}>
+          <Text style={[styles.transactionCategory, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+            {item.category_name}
+          </Text>
+          <Text style={styles.transactionDate}>
+            {formatDate(item.transaction_date)}
+          </Text>
+          {item.description && (
+            <Text style={styles.transactionDescription} numberOfLines={2}>
+              {item.description}
+            </Text>
+          )}
+        </View>
+      </View>
+      <View style={styles.transactionRight}>
+        <Text style={[
+          styles.transactionAmount,
+          { color: item.transaction_type === 'income' ? '#4ECDC4' : '#FF6B6B' }
+        ]}>
+          {item.transaction_type === 'income' ? '+' : '-'}{formatCurrency(item.amount)}
+        </Text>
+        <View style={styles.transactionMeta}>
+          {item.is_voice_input && (
+            <Ionicons name="mic" size={12} color="#999" style={styles.voiceIcon} />
+          )}
+          <Text style={styles.transactionCurrency}>
+            {item.currency}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+
+  const renderEmptyState = () => (
+    <View style={styles.emptyState}>
+      <Ionicons name="receipt-outline" size={64} color="#ccc" />
+      <Text style={styles.emptyText}>No transactions found</Text>
+      <Text style={styles.emptySubtext}>
+        {selectedPeriod === 'all' 
+          ? 'Add your first transaction to get started' 
+          : `No transactions in the last ${selectedPeriod} days`
+        }
+      </Text>
+    </View>
+  );
+
+  // Group transactions by date
+  const groupTransactionsByDate = () => {
+    const groups: { [key: string]: any[] } = {};
+    
+    filteredTransactions.forEach(transaction => {
+      const dateKey = formatDate(transaction.transaction_date);
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
+      }
+      groups[dateKey].push(transaction);
+    });
+
+    return Object.entries(groups).map(([date, items]) => ({
+      date,
+      data: items,
+      totalAmount: items.reduce((sum, item) => {
+        return item.transaction_type === 'expense' 
+          ? sum - item.amount 
+          : sum + item.amount;
+      }, 0)
+    }));
+  };
+
+  const groupedTransactions = groupTransactionsByDate();
+
+  const renderDateGroup = ({ item }: { item: any }) => (
+    <View style={styles.dateGroup}>
+      <View style={styles.dateHeader}>
+        <Text style={[styles.dateText, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+          {item.date}
+        </Text>
+        <Text style={[
+          styles.dateTotalText,
+          { color: item.totalAmount >= 0 ? '#4ECDC4' : '#FF6B6B' }
+        ]}>
+          {item.totalAmount >= 0 ? '+' : ''}{formatCurrency(Math.abs(item.totalAmount))}
+        </Text>
+      </View>
+      {item.data.map((transaction: any) => (
+        <View key={transaction.id}>
+          {renderTransaction({ item: transaction })}
+        </View>
+      ))}
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: settings.dark_mode ? '#121212' : '#f8f9fa' }]}>
+      <View style={styles.header}>
+        <Text style={[styles.headerTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+          Transactions
+        </Text>
+        <Text style={[styles.headerSubtitle, { color: settings.dark_mode ? '#ccc' : '#666' }]}>
+          {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? 's' : ''}
+        </Text>
+      </View>
+
+      {/* Period Filter */}
+      <View style={styles.filterContainer}>
+        <View style={styles.periodSelector}>
+          {(['7', '30', '90', 'all'] as const).map((period) => (
+            <TouchableOpacity
+              key={period}
+              style={[
+                styles.periodButton,
+                selectedPeriod === period && styles.periodButtonActive,
+                { 
+                  backgroundColor: selectedPeriod === period ? '#FF6B6B' : (settings.dark_mode ? '#1e1e1e' : '#fff')
+                }
+              ]}
+              onPress={() => setSelectedPeriod(period)}
+            >
+              <Text style={[
+                styles.periodButtonText,
+                { color: selectedPeriod === period ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }
+              ]}>
+                {period === 'all' ? 'All' : `${period}d`}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* Transactions List */}
+      <FlatList
+        data={groupedTransactions}
+        renderItem={renderDateGroup}
+        keyExtractor={(item) => item.date}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        ListEmptyComponent={renderEmptyState}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={filteredTransactions.length === 0 ? styles.emptyContainer : undefined}
+      />
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  header: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    marginTop: 4,
+  },
+  filterContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  periodSelector: {
+    flexDirection: 'row',
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#e0e0e0',
+  },
+  periodButton: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  periodButtonActive: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  periodButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  dateGroup: {
+    marginBottom: 16,
+  },
+  dateHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginBottom: 8,
+  },
+  dateText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  dateTotalText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  transactionItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    marginVertical: 2,
+    marginHorizontal: 16,
+    borderRadius: 12,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  transactionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  categoryIndicator: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  transactionDetails: {
+    flex: 1,
+  },
+  transactionCategory: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  transactionDate: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
+  },
+  transactionDescription: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+    lineHeight: 16,
+  },
+  transactionRight: {
+    alignItems: 'flex-end',
+  },
+  transactionAmount: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  transactionMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  voiceIcon: {
+    marginRight: 4,
+  },
+  transactionCurrency: {
+    fontSize: 10,
+    color: '#999',
+    fontWeight: '500',
+  },
+  emptyContainer: {
+    flex: 1,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 64,
+  },
+  emptyText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#999',
+    marginTop: 16,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#ccc',
+    marginTop: 8,
+    textAlign: 'center',
+    maxWidth: 250,
+  },
+});
