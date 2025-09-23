@@ -176,26 +176,59 @@ export default function Index() {
     }
 
     try {
+      if (isListening) {
+        // Stop listening
+        await Voice.stop();
+        setIsListening(false);
+        return;
+      }
+
+      // Check if voice recognition is available
+      const available = await Voice.isAvailable();
+      if (!available) {
+        Alert.alert(
+          'Voice Recognition Not Available', 
+          'Speech recognition is not available on this device. Please enter the transaction manually.'
+        );
+        return;
+      }
+
+      // Start listening
       setIsListening(true);
+      await Voice.start('en-US'); // You can change to 'hi-IN' for Hindi or other languages
       
-      // For demo purposes, we'll simulate voice input
-      setTimeout(() => {
+      // Set a timeout to stop listening after 10 seconds
+      setTimeout(async () => {
+        if (isListening) {
+          try {
+            await Voice.stop();
+            setIsListening(false);
+          } catch (error) {
+            console.error('Error stopping voice recognition:', error);
+          }
+        }
+      }, 10000);
+      
+    } catch (error) {
+      console.error('Voice input error:', error);
+      setIsListening(false);
+      
+      // Fallback to dummy data for web testing
+      if (Platform.OS === 'web') {
         const sampleInputs = [
           'Spent 500 rupees on groceries',
-          'Earned 2000 dollars from freelancing',
+          'Earned 2000 dollars from freelancing', 
           'Paid 150 for utilities',
           'Bought coffee for 80 rupees'
         ];
         
         const randomInput = sampleInputs[Math.floor(Math.random() * sampleInputs.length)];
-        parseVoiceInput(randomInput);
-        setIsListening(false);
-      }, 2000);
-      
-    } catch (error) {
-      console.error('Voice input error:', error);
-      Alert.alert('Error', 'Failed to process voice input');
-      setIsListening(false);
+        setTimeout(() => {
+          parseVoiceInput(randomInput);
+        }, 1500);
+      } else {
+        Alert.alert('Error', 'Failed to start voice recognition. Please try again.');
+      }
     }
   };
 
