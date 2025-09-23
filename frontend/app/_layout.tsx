@@ -137,6 +137,47 @@ export default function RootLayout() {
     }
   };
 
+  const updateTransaction = async (id: string, transactionData: Partial<Transaction>) => {
+    try {
+      const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/transactions/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(transactionData),
+      });
+
+      if (response.ok) {
+        const updatedTransaction = await response.json();
+        setTransactions(prev => prev.map(t => t.id === id ? updatedTransaction : t));
+        const updatedTransactions = transactions.map(t => t.id === id ? updatedTransaction : t);
+        await AsyncStorage.setItem('transactions', JSON.stringify(updatedTransactions));
+      } else {
+        throw new Error('Failed to update transaction');
+      }
+    } catch (error) {
+      console.error('Error updating transaction:', error);
+      throw error;
+    }
+  };
+
+  const deleteTransaction = async (id: string) => {
+    try {
+      const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/transactions/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setTransactions(prev => prev.filter(t => t.id !== id));
+        const updatedTransactions = transactions.filter(t => t.id !== id);
+        await AsyncStorage.setItem('transactions', JSON.stringify(updatedTransactions));
+      } else {
+        throw new Error('Failed to delete transaction');
+      }
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      throw error;
+    }
+  };
+
   const updateSettings = async (newSettings: Partial<AppSettings>) => {
     try {
       const updatedSettings = { ...settings, ...newSettings };
