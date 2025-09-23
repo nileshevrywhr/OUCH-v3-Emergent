@@ -64,7 +64,60 @@ export default function Index() {
   // Load initial data
   useEffect(() => {
     loadInitialData();
+    initializeVoice();
   }, []);
+
+  const initializeVoice = async () => {
+    try {
+      // Initialize voice recognition
+      Voice.onSpeechStart = () => {
+        console.log('Speech recognition started');
+      };
+
+      Voice.onSpeechRecognized = () => {
+        console.log('Speech recognized');
+      };
+
+      Voice.onSpeechResults = (event: SpeechResultsEvent) => {
+        console.log('Speech results:', event.value);
+        if (event.value && event.value[0]) {
+          const spokenText = event.value[0];
+          parseVoiceInput(spokenText);
+        }
+      };
+
+      Voice.onSpeechError = (event: SpeechErrorEvent) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+        Alert.alert('Voice Recognition Error', 'Failed to recognize speech. Please try again.');
+      };
+
+      Voice.onSpeechEnd = () => {
+        console.log('Speech recognition ended');
+        setIsListening(false);
+      };
+
+      // Request microphone permission on Android
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+          {
+            title: 'Microphone Permission',
+            message: 'ExpenseTracker needs access to your microphone for voice input.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          }
+        );
+        
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          console.warn('Microphone permission denied');
+        }
+      }
+    } catch (error) {
+      console.error('Error initializing voice:', error);
+    }
+  };
 
   const loadInitialData = async () => {
     try {
