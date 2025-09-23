@@ -196,10 +196,11 @@ export default function TransactionsScreen() {
 
   const renderTransaction = ({ item }: { item: any }) => (
     <Swipeable
+      key={item.id}
       renderRightAction={(dragX) => renderRightAction(item, dragX)}
       renderLeftAction={(dragX) => renderLeftAction(item, dragX)}
-      rightThreshold={40}
-      leftThreshold={40}
+      rightThreshold={30}
+      leftThreshold={30}
     >
       <View style={[styles.transactionItem, { backgroundColor: settings.dark_mode ? '#1e1e1e' : '#fff' }]}>
         <View style={styles.transactionLeft}>
