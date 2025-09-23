@@ -289,7 +289,53 @@ export default function TransactionsScreen() {
       groups[dateKey].push(transaction);
     });
 
-    return Object.entries(groups).map(([date, items]) => ({
+    // Sort transactions within each date group
+    Object.keys(groups).forEach(dateKey => {
+      groups[dateKey].sort((a, b) => {
+        if (selectedPeriod === 'all') {
+          // For "All" view: Sort by creation time (recently added/edited first)
+          const dateA = new Date(a.created_at || a.transaction_date);
+          const dateB = new Date(b.created_at || b.transaction_date);
+          return dateB.getTime() - dateA.getTime();
+        } else {
+          // For period filters: Sort by amount (highest first) within same date
+          return b.amount - a.amount;
+        }
+      });
+    });
+
+    // Sort date groups by date (most recent first)
+    const sortedEntries = Object.entries(groups).sort(([dateA], [dateB]) => {
+      // Handle special date labels
+      const getDatePriority = (dateLabel: string) => {
+        if (dateLabel === 'Today') return 0;
+        if (dateLabel === 'Yesterday') return 1;
+        return 2;
+      };
+      
+      const priorityA = getDatePriority(dateA);
+      const priorityB = getDatePriority(dateB);
+      
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+      
+      // For other dates, parse and sort by actual date
+      if (priorityA === 2 && priorityB === 2) {
+        // Extract dates from groups to sort by actual transaction date
+        const transactionsA = groups[dateA];
+        const transactionsB = groups[dateB];
+        if (transactionsA.length > 0 && transactionsB.length > 0) {
+          const actualDateA = new Date(transactionsA[0].transaction_date);
+          const actualDateB = new Date(transactionsB[0].transaction_date);
+          return actualDateB.getTime() - actualDateA.getTime();
+        }
+      }
+      
+      return 0;
+    });
+
+    return sortedEntries.map(([date, items]) => ({
       date,
       data: items,
       totalAmount: items.reduce((sum, item) => {
