@@ -150,9 +150,11 @@ export default function RootLayout() {
 
       if (response.ok) {
         const updatedTransaction = await response.json();
-        setTransactions(prev => prev.map(t => t.id === id ? updatedTransaction : t));
-        const updatedTransactions = transactions.map(t => t.id === id ? updatedTransaction : t);
-        await AsyncStorage.setItem('transactions', JSON.stringify(updatedTransactions));
+        setTransactions(prev => {
+          const updated = prev.map(t => t.id === id ? updatedTransaction : t);
+          AsyncStorage.setItem('transactions', JSON.stringify(updated));
+          return updated;
+        });
       } else {
         throw new Error('Failed to update transaction');
       }
