@@ -57,6 +57,8 @@ export default function Index() {
   const [transactionType, setTransactionType] = useState<'income' | 'expense'>('expense');
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Load initial data
   useEffect(() => {
