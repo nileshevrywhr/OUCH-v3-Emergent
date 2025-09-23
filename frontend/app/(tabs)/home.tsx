@@ -45,23 +45,63 @@ export default function HomeScreen() {
       .filter(t => t.transaction_type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
 
-    // Category breakdown
-    const categoryBreakdown: { [key: string]: number } = {};
-    monthlyTransactions
-      .filter(t => t.transaction_type === 'expense')
-      .forEach(t => {
-        categoryBreakdown[t.category_name] = (categoryBreakdown[t.category_name] || 0) + t.amount;
-      });
-
-    const sortedCategories = Object.entries(categoryBreakdown)
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 5);
-
     return {
       totalIncome,
       totalExpense,
       netAmount: totalIncome - totalExpense,
-      categoryBreakdown: sortedCategories,
+      transactionCount: monthlyTransactions.length,
+      monthlyTransactions,
+    };
+  }, [transactions]);
+
+  // Calculate category-wise spending with sorting
+  const categorySpending = useMemo(() => {
+    const categoryData: { [key: string]: { amount: number; count: number; name: string; color: string } } = {};
+    
+    monthlyData.monthlyTransactions
+      .filter(t => t.transaction_type === 'expense')
+      .forEach(t => {
+        if (!categoryData[t.category_name]) {
+          categoryData[t.category_name] = {
+            amount: 0,
+            count: 0,
+            name: t.category_name,
+            color: getColorForCategory(t.category_name),
+          };
+        }
+        categoryData[t.category_name].amount += t.amount;
+        categoryData[t.category_name].count += 1;
+      });
+
+    const sortedCategories = Object.values(categoryData);
+
+    // Apply sorting
+    switch (sortBy) {
+      case 'amount_desc':
+        return sortedCategories.sort((a, b) => b.amount - a.amount);
+      case 'amount_asc':
+        return sortedCategories.sort((a, b) => a.amount - b.amount);
+      case 'name_asc':
+        return sortedCategories.sort((a, b) => a.name.localeCompare(b.name));
+      case 'count_desc':
+        return sortedCategories.sort((a, b) => b.count - a.count);
+      default:
+        return sortedCategories.sort((a, b) => b.amount - a.amount);
+    }
+  }, [monthlyData.monthlyTransactions, sortBy]);
+
+  const getColorForCategory = (categoryName: string): string => {
+    const colors = [
+      '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+      '#F7DC6F', '#BB8FCE', '#85C1E9', '#F8C471', '#D5A6BD'
+    ];
+    let hash = 0;
+    for (let i = 0; i < categoryName.length; i++) {
+      hash = categoryName.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+  };
+
       transactionCount: monthlyTransactions.length,
     };
   }, [transactions]);
