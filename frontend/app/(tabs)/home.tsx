@@ -242,6 +242,53 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {/* Category Spending Section */}
+        {categorySpending.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                Category Spending
+              </Text>
+              
+              {/* Sort Options */}
+              <View style={styles.sortContainer}>
+                {(['amount_desc', 'amount_asc', 'name_asc', 'count_desc'] as const).map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.sortButton,
+                      sortBy === option && styles.sortButtonActive,
+                      { 
+                        backgroundColor: sortBy === option ? '#FF6B6B' : (settings.dark_mode ? '#1e1e1e' : '#fff')
+                      }
+                    ]}
+                    onPress={() => setSortBy(option)}
+                  >
+                    <Ionicons 
+                      name={getSortIcon(option)} 
+                      size={14} 
+                      color={sortBy === option ? '#fff' : (settings.dark_mode ? '#fff' : '#333')} 
+                    />
+                    <Text style={[
+                      styles.sortButtonText,
+                      { color: sortBy === option ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }
+                    ]}>
+                      {getSortLabel(option)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <FlatList
+              data={categorySpending}
+              renderItem={renderCategoryItem}
+              keyExtractor={(item) => item.name}
+              scrollEnabled={false}
+            />
+          </View>
+        )}
+
         {/* Bottom spacing for better scrolling */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
