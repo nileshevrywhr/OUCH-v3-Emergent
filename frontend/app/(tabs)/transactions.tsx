@@ -72,29 +72,18 @@ export default function TransactionsScreen() {
     }
 
     try {
-      const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/transactions/${editingTransaction.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: numAmount,
-          category_id: editCategory.id,
-          category_name: editCategory.name,
-          transaction_type: editType,
-          description: editDescription.trim(),
-          currency: settings.default_currency,
-          transaction_date: editDate.toISOString().split('T')[0],
-        }),
+      await updateTransaction(editingTransaction.id, {
+        amount: numAmount,
+        category_id: editCategory.id,
+        category_name: editCategory.name,
+        transaction_type: editType,
+        description: editDescription.trim(),
+        currency: settings.default_currency,
+        transaction_date: editDate.toISOString().split('T')[0],
       });
-
-      if (response.ok) {
-        Alert.alert('Success', 'Transaction updated successfully!');
-        setShowEditModal(false);
-        await refreshData();
-      } else {
-        throw new Error('Failed to update transaction');
-      }
+      
+      Alert.alert('Success', 'Transaction updated successfully!');
+      setShowEditModal(false);
     } catch (error) {
       console.error('Error updating transaction:', error);
       Alert.alert('Error', 'Failed to update transaction. Please try again.');
@@ -112,16 +101,8 @@ export default function TransactionsScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/transactions/${transaction.id}`, {
-                method: 'DELETE',
-              });
-
-              if (response.ok) {
-                Alert.alert('Success', 'Transaction deleted successfully!');
-                await refreshData();
-              } else {
-                throw new Error('Failed to delete transaction');
-              }
+              await deleteTransaction(transaction.id);
+              Alert.alert('Success', 'Transaction deleted successfully!');
             } catch (error) {
               console.error('Error deleting transaction:', error);
               Alert.alert('Error', 'Failed to delete transaction. Please try again.');
