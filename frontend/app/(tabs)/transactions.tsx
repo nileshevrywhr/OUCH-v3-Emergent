@@ -711,35 +711,53 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     maxWidth: 250,
   },
-  // Swipe action styles
-  editAction: {
-    flex: 1,
+  // Long press action styles
+  transactionItemSelected: {
+    backgroundColor: '#f0f8ff',
+    borderColor: '#4ECDC4',
+    borderWidth: 2,
+  },
+  transactionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    marginTop: 8,
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#4ECDC4',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    flex: 0.45,
     justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: 2,
-    marginRight: 16,
-    borderRadius: 12,
   },
-  deleteAction: {
-    flex: 1,
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#FF6B6B',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    flex: 0.45,
     justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: 2,
-    marginLeft: 16,
-    borderRadius: 12,
   },
-  actionButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-  actionText: {
+  actionButtonText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '600',
-    marginTop: 4,
+    marginLeft: 4,
   },
   // Modal styles
   modalContainer: {
