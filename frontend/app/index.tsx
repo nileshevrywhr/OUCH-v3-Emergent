@@ -599,7 +599,7 @@ export default function Index() {
                   color={isListening ? "#fff" : "#FF6B6B"} 
                 />
                 <Text style={[styles.voiceButtonText, isListening && styles.voiceButtonTextActive]}>
-                  {isListening ? 'Listening...' : 'Tap to speak'}
+                  {isListening ? 'Listening... (Tap to stop)' : 'Tap to speak'}
                 </Text>
               </TouchableOpacity>
 
