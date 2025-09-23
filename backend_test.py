@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """
-Comprehensive Backend API Testing for Expense Tracking App
-Tests all CRUD operations, analytics, and error handling
+Backend API Testing Script for Expense Tracker - EDIT/DELETE FOCUS
+Focus: Testing PUT and DELETE endpoints for transactions
 """
 
 import requests
 import json
+from datetime import datetime, date
 import uuid
-from datetime import datetime, date, timedelta
-from typing import Dict, List, Any
 import sys
-import os
 
 # Get backend URL from frontend .env file
 def get_backend_url():
@@ -27,7 +25,7 @@ def get_backend_url():
     return "http://localhost:8001/api"
 
 BASE_URL = get_backend_url()
-print(f"Testing backend at: {BASE_URL}")
+print(f"🚀 Testing backend EDIT/DELETE functionality at: {BASE_URL}")
 
 class ExpenseTrackerTester:
     def __init__(self):
