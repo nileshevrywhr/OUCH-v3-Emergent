@@ -208,7 +208,7 @@ export default function Index() {
           transaction_type: transactionType,
           description: description.trim(),
           currency: settings.default_currency,
-          transaction_date: new Date().toISOString().split('T')[0],
+          transaction_date: selectedDate.toISOString().split('T')[0],
           is_voice_input: isListening,
         }),
       });
