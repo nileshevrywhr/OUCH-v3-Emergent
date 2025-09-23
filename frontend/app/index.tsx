@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal, FlatList, KeyboardAvoidingView, Platform, ScrollView, TextInput, PermissionsAndroid } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NavigationContainer } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Speech from 'expo-speech';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import Voice, { SpeechResultsEvent, SpeechErrorEvent } from '@react-native-voice/voice';
+
+// Import screens
+import HomeScreen from './screens/HomeScreen';
+import AddExpenseScreen from './screens/HomeScreen';
+import SettingsScreen from './screens/SettingsScreen';
 
 // Types
-interface Transaction {
+export interface Transaction {
   id: string;
   amount: number;
   category_id: string;
@@ -22,7 +26,7 @@ interface Transaction {
   is_voice_input: boolean;
 }
 
-interface Category {
+export interface Category {
   id: string;
   name: string;
   color: string;
@@ -31,12 +35,31 @@ interface Category {
   created_at: string;
 }
 
-interface AppSettings {
+export interface AppSettings {
   default_currency: 'INR' | 'USD';
   dark_mode: boolean;
   voice_enabled: boolean;
   sync_enabled: boolean;
 }
+
+// Create Context
+export const AppContext = React.createContext<{
+  transactions: Transaction[];
+  categories: Category[];
+  settings: AppSettings;
+  refreshData: () => void;
+  addTransaction: (transaction: Omit<Transaction, 'id' | 'created_at'>) => Promise<void>;
+  updateSettings: (newSettings: Partial<AppSettings>) => Promise<void>;
+}>({
+  transactions: [],
+  categories: [],
+  settings: { default_currency: 'INR', dark_mode: false, voice_enabled: true, sync_enabled: false },
+  refreshData: () => {},
+  addTransaction: async () => {},
+  updateSettings: async () => {},
+});
+
+const Tab = createBottomTabNavigator();
 
 const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
