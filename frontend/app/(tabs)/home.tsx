@@ -101,7 +101,7 @@ export default function HomeScreen() {
       default:
         return sortedCategories.sort((a, b) => b.amount - a.amount);
     }
-  }, [monthlyData.monthlyTransactions, sortBy, getColorForCategory]);
+  }, [monthlyData.monthlyTransactions, sortBy]);
 
   const formatCurrency = (amount: number) => {
     const symbol = settings.default_currency === 'INR' ? '₹' : '$';
