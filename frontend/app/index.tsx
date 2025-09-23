@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform } from 'react-native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,9 +7,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Import screens
 import HomeScreen from './screens/HomeScreen';
-import SummaryScreen from './screens/SummaryScreen';
-import ChartsScreen from './screens/ChartsScreen';
-import SettingsScreen from './screens/SettingsScreen';
 
 // Types
 export interface Transaction {
@@ -60,11 +55,9 @@ export const AppContext = React.createContext<{
   updateSettings: async () => {},
 });
 
-const Tab = createBottomTabNavigator();
-
 const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-export default function App() {
+export default function Index() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [settings, setSettings] = useState<AppSettings>({
@@ -189,66 +182,8 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <AppContext.Provider value={contextValue}>
-        <NavigationContainer>
-          <StatusBar style={settings.dark_mode ? "light" : "dark"} />
-          <Tab.Navigator
-            screenOptions={({ route }) => ({
-              tabBarIcon: ({ focused, color, size }) => {
-                let iconName: keyof typeof Ionicons.glyphMap;
-
-                if (route.name === 'Home') {
-                  iconName = focused ? 'add-circle' : 'add-circle-outline';
-                } else if (route.name === 'Summary') {
-                  iconName = focused ? 'list' : 'list-outline';
-                } else if (route.name === 'Charts') {
-                  iconName = focused ? 'bar-chart' : 'bar-chart-outline';
-                } else if (route.name === 'Settings') {
-                  iconName = focused ? 'settings' : 'settings-outline';
-                } else {
-                  iconName = 'help-circle-outline';
-                }
-
-                return <Ionicons name={iconName} size={size} color={color} />;
-              },
-              tabBarActiveTintColor: '#FF6B6B',
-              tabBarInactiveTintColor: 'gray',
-              tabBarStyle: {
-                backgroundColor: settings.dark_mode ? '#1a1a1a' : '#ffffff',
-                borderTopColor: settings.dark_mode ? '#333' : '#e0e0e0',
-                paddingBottom: Platform.OS === 'ios' ? 20 : 5,
-                height: Platform.OS === 'ios' ? 80 : 60,
-              },
-              headerStyle: {
-                backgroundColor: settings.dark_mode ? '#1a1a1a' : '#ffffff',
-              },
-              headerTintColor: settings.dark_mode ? '#ffffff' : '#000000',
-              headerTitleStyle: {
-                fontWeight: '600',
-              },
-            })}
-          >
-            <Tab.Screen 
-              name="Home" 
-              component={HomeScreen}
-              options={{ title: 'Add Transaction' }}
-            />
-            <Tab.Screen 
-              name="Summary" 
-              component={SummaryScreen}
-              options={{ title: 'Summary' }}
-            />
-            <Tab.Screen 
-              name="Charts" 
-              component={ChartsScreen}
-              options={{ title: 'Analytics' }}
-            />
-            <Tab.Screen 
-              name="Settings" 
-              component={SettingsScreen}
-              options={{ title: 'Settings' }}
-            />
-          </Tab.Navigator>
-        </NavigationContainer>
+        <StatusBar style={settings.dark_mode ? "light" : "dark"} />
+        <HomeScreen />
       </AppContext.Provider>
     </SafeAreaProvider>
   );
