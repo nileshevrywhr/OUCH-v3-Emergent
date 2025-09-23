@@ -191,7 +191,7 @@ export default function TransactionsScreen() {
   // Left swipe action (Delete)
   const renderLeftAction = (item: any, dragX: Animated.AnimatedAddition) => {
     const scale = dragX.interpolate({
-      inputRange: [-100, 0],
+      inputRange: [-80, 0],
       outputRange: [1, 0],
       extrapolate: 'clamp',
     });
@@ -199,7 +199,10 @@ export default function TransactionsScreen() {
     return (
       <TouchableOpacity
         style={styles.deleteAction}
-        onPress={() => handleDeleteTransaction(item)}
+        onPress={() => {
+          closeAllSwipeables();
+          handleDeleteTransaction(item);
+        }}
       >
         <Animated.View style={[styles.actionButton, { transform: [{ scale }] }]}>
           <Ionicons name="trash-outline" size={24} color="#fff" />
