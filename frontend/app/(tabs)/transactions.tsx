@@ -557,7 +557,6 @@ export default function TransactionsScreen() {
           </KeyboardAvoidingView>
         </Modal>
       </SafeAreaView>
-    </GestureHandlerRootView>
   );
 }
 
