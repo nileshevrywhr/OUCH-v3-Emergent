@@ -74,16 +74,6 @@ export default function Index() {
   });
   const [loading, setLoading] = useState(true);
 
-  // Transaction form state
-  const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [transactionType, setTransactionType] = useState<'income' | 'expense'>('expense');
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
-
   // Load initial data and cleanup
   useEffect(() => {
     loadInitialData();
