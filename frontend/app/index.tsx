@@ -61,10 +61,15 @@ export default function Index() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  // Load initial data
+  // Load initial data and cleanup
   useEffect(() => {
     loadInitialData();
     initializeVoice();
+
+    // Cleanup function
+    return () => {
+      Voice.destroy().then(Voice.removeAllListeners);
+    };
   }, []);
 
   const initializeVoice = async () => {
