@@ -788,6 +788,33 @@ const styles = StyleSheet.create({
     color: '#FF6B6B',
     marginRight: 8,
   },
+  amountLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  compactTypeToggle: {
+    flexDirection: 'row',
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#f0f0f0',
+  },
+  compactTypeButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  compactTypeButtonActive: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  compactTypeButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
   amountInput: {
     flex: 1,
     fontSize: 24,
