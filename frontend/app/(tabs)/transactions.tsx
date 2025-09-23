@@ -228,6 +228,7 @@ export default function TransactionsScreen() {
       childrenContainerStyle={{ backgroundColor: 'transparent' }}
       friction={1}
       overshootFriction={8}
+      onSwipeableWillOpen={() => closeAllSwipeables(item.id)}
     >
       <View style={[styles.transactionItem, { backgroundColor: settings.dark_mode ? '#1e1e1e' : '#fff' }]}>
         <View style={styles.transactionLeft}>
