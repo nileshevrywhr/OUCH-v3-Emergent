@@ -297,7 +297,9 @@ export default function TransactionsScreen() {
         </Text>
       </View>
       {item.data.map((transaction: any) => 
-        renderTransaction({ item: transaction })
+        <View key={transaction.id}>
+          {renderTransaction({ item: transaction })}
+        </View>
       )}
     </View>
   );
