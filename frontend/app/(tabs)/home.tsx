@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,19 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppContext } from '../_layout';
 
 type SortOption = 'amount_desc' | 'amount_asc' | 'name_asc' | 'count_desc';
+
+// Move the color function outside the component to avoid re-creation
+const getColorForCategory = (categoryName: string): string => {
+  const colors = [
+    '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+    '#F7DC6F', '#BB8FCE', '#85C1E9', '#F8C471', '#D5A6BD'
+  ];
+  let hash = 0;
+  for (let i = 0; i < categoryName.length; i++) {
+    hash = categoryName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+};
 
 export default function HomeScreen() {
   const { transactions, refreshData, settings } = useContext(AppContext);
