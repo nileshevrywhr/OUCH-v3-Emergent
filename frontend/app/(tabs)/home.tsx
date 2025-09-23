@@ -155,9 +155,6 @@ export default function HomeScreen() {
       </View>
     );
   };
-
-      transactionCount: monthlyTransactions.length,
-    };
   }, [transactions]);
   };
 
