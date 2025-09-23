@@ -94,6 +94,18 @@ export default function AddExpenseScreen() {
         return;
       }
 
+      // Check if Voice is available (null check for web compatibility)
+      if (!Voice || typeof Voice.isAvailable !== 'function') {
+        // Fallback for web or when Voice is not available
+        if (Platform.OS === 'web') {
+          handleWebVoiceFallback();
+          return;
+        } else {
+          Alert.alert('Voice Recognition Not Available', 'Speech recognition is not available on this device.');
+          return;
+        }
+      }
+
       const available = await Voice.isAvailable();
       if (!available) {
         Alert.alert('Voice Recognition Not Available', 'Speech recognition is not available on this device.');
