@@ -6,15 +6,35 @@ import {
   FlatList,
   RefreshControl,
   TouchableOpacity,
+  Alert,
+  Modal,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { AppContext } from '../_layout';
 
 export default function TransactionsScreen() {
-  const { transactions, refreshData, settings } = useContext(AppContext);
+  const { transactions, refreshData, settings, categories } = useContext(AppContext);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'7' | '30' | 90 | 'all'>('all');
+  
+  // Edit modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<any>(null);
+  const [editAmount, setEditAmount] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editCategory, setEditCategory] = useState<any>(null);
+  const [editType, setEditType] = useState<'income' | 'expense'>('expense');
+  const [editDate, setEditDate] = useState(new Date());
+  const [showEditDatePicker, setShowEditDatePicker] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+
+  const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
   const onRefresh = async () => {
     setRefreshing(true);
