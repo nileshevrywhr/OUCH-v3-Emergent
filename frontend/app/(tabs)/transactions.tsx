@@ -167,7 +167,7 @@ export default function TransactionsScreen() {
   // Right swipe action (Edit) 
   const renderRightAction = (item: any, dragX: Animated.AnimatedAddition) => {
     const scale = dragX.interpolate({
-      inputRange: [0, 100],
+      inputRange: [0, 80],
       outputRange: [0, 1],
       extrapolate: 'clamp',
     });
@@ -175,7 +175,10 @@ export default function TransactionsScreen() {
     return (
       <TouchableOpacity
         style={styles.editAction}
-        onPress={() => handleEditTransaction(item)}
+        onPress={() => {
+          closeAllSwipeables();
+          handleEditTransaction(item);
+        }}
       >
         <Animated.View style={[styles.actionButton, { transform: [{ scale }] }]}>
           <Ionicons name="create-outline" size={24} color="#fff" />
