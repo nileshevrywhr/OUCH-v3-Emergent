@@ -112,19 +112,38 @@ export default function TransactionsScreen() {
     );
   };
 
-  // Filter transactions by selected period
+  // Filter and sort transactions by selected period
   const getFilteredTransactions = () => {
     if (selectedPeriod === 'all') {
-      return transactions;
+      // For "All" view: Sort by recently added/edited (creation timestamp)
+      return [...transactions].sort((a, b) => {
+        // Sort by created_at timestamp (most recent first)
+        const dateA = new Date(a.created_at || a.transaction_date);
+        const dateB = new Date(b.created_at || b.transaction_date);
+        return dateB.getTime() - dateA.getTime();
+      });
     }
     
     const days = parseInt(selectedPeriod.toString());
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
     
-    return transactions.filter(t => 
-      new Date(t.transaction_date) >= cutoffDate
-    );
+    // For period filters: Filter by date range and sort by transaction date (newest first)
+    return transactions
+      .filter(t => new Date(t.transaction_date) >= cutoffDate)
+      .sort((a, b) => {
+        // Primary sort: by transaction date (newest first)
+        const dateA = new Date(a.transaction_date);
+        const dateB = new Date(b.transaction_date);
+        const dateDiff = dateB.getTime() - dateA.getTime();
+        
+        // Secondary sort: by amount (highest first) if same date
+        if (dateDiff === 0) {
+          return b.amount - a.amount;
+        }
+        
+        return dateDiff;
+      });
   };
 
   const filteredTransactions = getFilteredTransactions();
