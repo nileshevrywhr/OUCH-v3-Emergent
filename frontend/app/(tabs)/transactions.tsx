@@ -23,17 +23,8 @@ export default function TransactionsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'7' | '30' | 90 | 'all'>('all');
   
-  // Refs for gesture handling
-  const swipeableRefs = useRef<{ [key: string]: Swipeable | null }>({});
-
-  // Function to close all open swipeable items except the current one
-  const closeAllSwipeables = (exceptId?: string) => {
-    Object.keys(swipeableRefs.current).forEach((id) => {
-      if (id !== exceptId && swipeableRefs.current[id]) {
-        swipeableRefs.current[id]?.close();
-      }
-    });
-  };
+  // State for long press actions
+  const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
   
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
