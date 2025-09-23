@@ -153,25 +153,8 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
-            Recent Transactions
-          </Text>
-          {transactions.length > 0 ? (
-            <FlatList
-              data={transactions.slice(0, 8)}
-              renderItem={renderTransaction}
-              keyExtractor={(item) => item.id}
-              scrollEnabled={false}
-            />
-          ) : (
-            <View style={styles.emptyState}>
-              <Ionicons name="receipt-outline" size={48} color="#ccc" />
-              <Text style={styles.emptyText}>No transactions yet</Text>
-              <Text style={styles.emptySubtext}>Start tracking your expenses by adding your first transaction</Text>
-            </View>
-          )}
-        </View>
+        {/* Bottom spacing for better scrolling */}
+        <View style={styles.bottomSpacing} />
       </ScrollView>
     </SafeAreaView>
   );
