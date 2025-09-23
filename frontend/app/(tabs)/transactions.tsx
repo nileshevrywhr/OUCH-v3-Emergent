@@ -399,7 +399,7 @@ export default function TransactionsScreen() {
                   styles.periodButtonText,
                   { color: selectedPeriod === period ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }
                 ]}>
-                  {period === 'all' ? 'All' : `${period}d`}
+                  {period === 'all' ? 'Recent' : `${period}d`}
                 </Text>
               </TouchableOpacity>
             ))}
