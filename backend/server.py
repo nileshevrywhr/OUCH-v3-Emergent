@@ -176,7 +176,15 @@ async def create_transaction(transaction_data: TransactionCreate):
     transaction_dict = transaction_data.dict()
     transaction_dict["category_name"] = category["name"]
     transaction = Transaction(**transaction_dict)
-    result = await db.transactions.insert_one(transaction.dict())
+    
+    # Convert date to string for MongoDB storage
+    transaction_for_db = transaction.dict()
+    if isinstance(transaction_for_db["transaction_date"], date):
+        transaction_for_db["transaction_date"] = transaction_for_db["transaction_date"].isoformat()
+    if isinstance(transaction_for_db["created_at"], datetime):
+        transaction_for_db["created_at"] = transaction_for_db["created_at"].isoformat()
+    
+    result = await db.transactions.insert_one(transaction_for_db)
     return transaction
 
 @api_router.get("/transactions/{transaction_id}", response_model=Transaction)
