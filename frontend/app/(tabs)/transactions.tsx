@@ -42,6 +42,94 @@ export default function TransactionsScreen() {
     setRefreshing(false);
   };
 
+  // Edit transaction functions
+  const handleEditTransaction = (transaction: any) => {
+    setEditingTransaction(transaction);
+    setEditAmount(transaction.amount.toString());
+    setEditDescription(transaction.description || '');
+    setEditType(transaction.transaction_type);
+    setEditDate(new Date(transaction.transaction_date));
+    
+    // Find the category
+    const category = categories.find(cat => cat.id === transaction.category_id);
+    setEditCategory(category || null);
+    
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editAmount || !editCategory) {
+      Alert.alert('Error', 'Please fill in amount and select a category');
+      return;
+    }
+
+    const numAmount = parseFloat(editAmount);
+    if (isNaN(numAmount) || numAmount <= 0) {
+      Alert.alert('Error', 'Please enter a valid amount');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/transactions/${editingTransaction.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: numAmount,
+          category_id: editCategory.id,
+          category_name: editCategory.name,
+          transaction_type: editType,
+          description: editDescription.trim(),
+          currency: settings.default_currency,
+          transaction_date: editDate.toISOString().split('T')[0],
+        }),
+      });
+
+      if (response.ok) {
+        Alert.alert('Success', 'Transaction updated successfully!');
+        setShowEditModal(false);
+        await refreshData();
+      } else {
+        throw new Error('Failed to update transaction');
+      }
+    } catch (error) {
+      console.error('Error updating transaction:', error);
+      Alert.alert('Error', 'Failed to update transaction. Please try again.');
+    }
+  };
+
+  const handleDeleteTransaction = (transaction: any) => {
+    Alert.alert(
+      'Delete Transaction',
+      `Are you sure you want to delete this ${transaction.transaction_type} of ${formatCurrency(transaction.amount)}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/transactions/${transaction.id}`, {
+                method: 'DELETE',
+              });
+
+              if (response.ok) {
+                Alert.alert('Success', 'Transaction deleted successfully!');
+                await refreshData();
+              } else {
+                throw new Error('Failed to delete transaction');
+              }
+            } catch (error) {
+              console.error('Error deleting transaction:', error);
+              Alert.alert('Error', 'Failed to delete transaction. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   // Filter transactions by selected period
   const getFilteredTransactions = () => {
     if (selectedPeriod === 'all') {
