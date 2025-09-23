@@ -102,6 +102,55 @@ export default function HomeScreen() {
     return colors[Math.abs(hash) % colors.length];
   };
 
+  const getSortIcon = (option: SortOption) => {
+    switch (option) {
+      case 'amount_desc':
+        return 'trending-down';
+      case 'amount_asc':
+        return 'trending-up';
+      case 'name_asc':
+        return 'text-outline';
+      case 'count_desc':
+        return 'bar-chart-outline';
+    }
+  };
+
+  const getSortLabel = (option: SortOption) => {
+    switch (option) {
+      case 'amount_desc':
+        return 'Amount ↓';
+      case 'amount_asc':
+        return 'Amount ↑';
+      case 'name_asc':
+        return 'Name A-Z';
+      case 'count_desc':
+        return 'Frequency';
+    }
+  };
+
+  const renderCategoryItem = ({ item }: { item: any }) => {
+    const percentage = monthlyData.totalExpense > 0 ? (item.amount / monthlyData.totalExpense * 100) : 0;
+    
+    return (
+      <View style={[styles.categoryItem, { backgroundColor: settings.dark_mode ? '#1e1e1e' : '#fff' }]}>
+        <View style={styles.categoryLeft}>
+          <View style={[styles.categoryDot, { backgroundColor: item.color }]} />
+          <View style={styles.categoryInfo}>
+            <Text style={[styles.categoryName, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+              {item.name}
+            </Text>
+            <Text style={styles.categoryMeta}>
+              {item.count} transaction{item.count !== 1 ? 's' : ''} • {percentage.toFixed(1)}%
+            </Text>
+          </View>
+        </View>
+        <Text style={[styles.categoryAmount, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+          {formatCurrency(item.amount)}
+        </Text>
+      </View>
+    );
+  };
+
       transactionCount: monthlyTransactions.length,
     };
   }, [transactions]);
