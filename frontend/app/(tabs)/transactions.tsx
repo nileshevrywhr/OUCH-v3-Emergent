@@ -199,11 +199,20 @@ export default function TransactionsScreen() {
 
   const renderTransaction = ({ item }: { item: any }) => (
     <Swipeable
+      ref={(ref) => {
+        if (ref && item.id) {
+          swipeableRefs.current[item.id] = ref;
+        }
+      }}
       key={item.id}
       renderRightAction={(dragX) => renderRightAction(item, dragX)}
       renderLeftAction={(dragX) => renderLeftAction(item, dragX)}
-      rightThreshold={30}
-      leftThreshold={30}
+      rightThreshold={20}
+      leftThreshold={20}
+      containerStyle={{ backgroundColor: 'transparent' }}
+      childrenContainerStyle={{ backgroundColor: 'transparent' }}
+      friction={1}
+      overshootFriction={8}
     >
       <View style={[styles.transactionItem, { backgroundColor: settings.dark_mode ? '#1e1e1e' : '#fff' }]}>
         <View style={styles.transactionLeft}>
