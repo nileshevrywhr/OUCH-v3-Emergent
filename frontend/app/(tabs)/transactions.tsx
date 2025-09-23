@@ -355,6 +355,9 @@ export default function TransactionsScreen() {
           ListEmptyComponent={renderEmptyState}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={filteredTransactions.length === 0 ? styles.emptyContainer : undefined}
+          scrollEventThrottle={16}
+          removeClippedSubviews={false}
+          windowSize={10}
         />
 
         {/* Edit Transaction Modal */}
