@@ -211,7 +211,7 @@ export default function Index() {
           >
             <Tab.Screen 
               name="Home" 
-              component={HomeScreen}
+              component={DashboardScreen}
               options={{ title: 'Dashboard' }}
             />
             <Tab.Screen 
