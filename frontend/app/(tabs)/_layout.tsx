@@ -47,12 +47,14 @@ export default function TabsLayout() {
         name="home"
         options={{
           title: 'Dashboard',
+          headerShown: false,
         }}
       />
       <Tabs.Screen
         name="add"
         options={{
           title: 'Add Expense',
+          headerShown: false,
         }}
       />
       <Tabs.Screen
