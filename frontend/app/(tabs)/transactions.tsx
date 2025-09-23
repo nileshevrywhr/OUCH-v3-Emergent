@@ -21,7 +21,7 @@ import { Swipeable, GestureHandlerRootView } from 'react-native-gesture-handler'
 import { AppContext } from '../_layout';
 
 export default function TransactionsScreen() {
-  const { transactions, refreshData, settings, categories } = useContext(AppContext);
+  const { transactions, refreshData, settings, categories, updateTransaction, deleteTransaction } = useContext(AppContext);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'7' | '30' | 90 | 'all'>('all');
   
