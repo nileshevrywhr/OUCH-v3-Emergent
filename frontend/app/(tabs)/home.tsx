@@ -282,4 +282,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     textAlign: 'center',
   },
+  bottomSpacing: {
+    height: 20,
+  },
 });
