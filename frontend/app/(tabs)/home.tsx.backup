@@ -45,23 +45,112 @@ export default function HomeScreen() {
       .filter(t => t.transaction_type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
 
-    // Category breakdown
-    const categoryBreakdown: { [key: string]: number } = {};
-    monthlyTransactions
-      .filter(t => t.transaction_type === 'expense')
-      .forEach(t => {
-        categoryBreakdown[t.category_name] = (categoryBreakdown[t.category_name] || 0) + t.amount;
-      });
-
-    const sortedCategories = Object.entries(categoryBreakdown)
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 5);
-
     return {
       totalIncome,
       totalExpense,
       netAmount: totalIncome - totalExpense,
-      categoryBreakdown: sortedCategories,
+      transactionCount: monthlyTransactions.length,
+      monthlyTransactions,
+    };
+  }, [transactions]);
+
+  // Calculate category-wise spending with sorting
+  const categorySpending = useMemo(() => {
+    const categoryData: { [key: string]: { amount: number; count: number; name: string; color: string } } = {};
+    
+    monthlyData.monthlyTransactions
+      .filter(t => t.transaction_type === 'expense')
+      .forEach(t => {
+        if (!categoryData[t.category_name]) {
+          categoryData[t.category_name] = {
+            amount: 0,
+            count: 0,
+            name: t.category_name,
+            color: getColorForCategory(t.category_name),
+          };
+        }
+        categoryData[t.category_name].amount += t.amount;
+        categoryData[t.category_name].count += 1;
+      });
+
+    const sortedCategories = Object.values(categoryData);
+
+    // Apply sorting
+    switch (sortBy) {
+      case 'amount_desc':
+        return sortedCategories.sort((a, b) => b.amount - a.amount);
+      case 'amount_asc':
+        return sortedCategories.sort((a, b) => a.amount - b.amount);
+      case 'name_asc':
+        return sortedCategories.sort((a, b) => a.name.localeCompare(b.name));
+      case 'count_desc':
+        return sortedCategories.sort((a, b) => b.count - a.count);
+      default:
+        return sortedCategories.sort((a, b) => b.amount - a.amount);
+    }
+  }, [monthlyData.monthlyTransactions, sortBy]);
+
+  const getColorForCategory = (categoryName: string): string => {
+    const colors = [
+      '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+      '#F7DC6F', '#BB8FCE', '#85C1E9', '#F8C471', '#D5A6BD'
+    ];
+    let hash = 0;
+    for (let i = 0; i < categoryName.length; i++) {
+      hash = categoryName.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+  };
+
+  const getSortIcon = (option: SortOption) => {
+    switch (option) {
+      case 'amount_desc':
+        return 'trending-down';
+      case 'amount_asc':
+        return 'trending-up';
+      case 'name_asc':
+        return 'text-outline';
+      case 'count_desc':
+        return 'bar-chart-outline';
+    }
+  };
+
+  const getSortLabel = (option: SortOption) => {
+    switch (option) {
+      case 'amount_desc':
+        return 'Amount ↓';
+      case 'amount_asc':
+        return 'Amount ↑';
+      case 'name_asc':
+        return 'Name A-Z';
+      case 'count_desc':
+        return 'Frequency';
+    }
+  };
+
+  const renderCategoryItem = ({ item }: { item: any }) => {
+    const percentage = monthlyData.totalExpense > 0 ? (item.amount / monthlyData.totalExpense * 100) : 0;
+    
+    return (
+      <View style={[styles.categoryItem, { backgroundColor: settings.dark_mode ? '#1e1e1e' : '#fff' }]}>
+        <View style={styles.categoryLeft}>
+          <View style={[styles.categoryDot, { backgroundColor: item.color }]} />
+          <View style={styles.categoryInfo}>
+            <Text style={[styles.categoryName, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+              {item.name}
+            </Text>
+            <Text style={styles.categoryMeta}>
+              {item.count} transaction{item.count !== 1 ? 's' : ''} • {percentage.toFixed(1)}%
+            </Text>
+          </View>
+        </View>
+        <Text style={[styles.categoryAmount, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+          {formatCurrency(item.amount)}
+        </Text>
+      </View>
+    );
+  };
+
       transactionCount: monthlyTransactions.length,
     };
   }, [transactions]);
