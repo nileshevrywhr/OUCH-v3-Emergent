@@ -12,6 +12,7 @@ export interface Transaction {
   category_id: string;
   category_name: string;
   transaction_type: 'income' | 'expense';
+  expense_type?: 'need' | 'want' | 'investment';
   description?: string;
   currency: string;
   transaction_date: string;
