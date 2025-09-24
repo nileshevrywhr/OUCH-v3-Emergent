@@ -26,6 +26,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('amount_desc');
   const [expenseTypeData, setExpenseTypeData] = useState<any>(null);
+  const [expenseTypeData, setExpenseTypeData] = useState<any>(null);
 };
 
 export default function HomeScreen() {
