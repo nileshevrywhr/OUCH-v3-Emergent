@@ -702,4 +702,29 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
   },
+  expenseTypeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  expenseTypeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginHorizontal: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  expenseTypeButtonActive: {
+    borderColor: '#FF6B6B',
+  },
+  expenseTypeText: {
+    marginLeft: 6,
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });
