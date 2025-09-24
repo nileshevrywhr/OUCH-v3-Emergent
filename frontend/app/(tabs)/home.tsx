@@ -21,16 +21,38 @@ const getColorForCategory = (categoryName: string): string => {
     '#F7DC6F', '#BB8FCE', '#85C1E9', '#F8C471', '#D5A6BD'
   ];
   let hash = 0;
+  for (let i = 0; i < categoryName.length; i++) {
+    hash = categoryName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+};
+
 export default function HomeScreen() {
   const { transactions, refreshData, settings, getExpenseTypeAnalytics } = useContext(AppContext);
   const [refreshing, setRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('amount_desc');
   const [expenseTypeData, setExpenseTypeData] = useState<any>(null);
+
   const onRefresh = async () => {
     setRefreshing(true);
     await refreshData();
+    await fetchExpenseTypeData();
     setRefreshing(false);
   };
+
+  // Fetch expense type data when component mounts or transactions change
+  const fetchExpenseTypeData = async () => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    const currentYear = currentDate.getFullYear();
+    
+    const data = await getExpenseTypeAnalytics(currentYear, currentMonth);
+    setExpenseTypeData(data);
+  };
+
+  React.useEffect(() => {
+    fetchExpenseTypeData();
+  }, [transactions]); // Re-fetch when transactions change
 
   // Calculate totals for current month
   const monthlyData = useMemo(() => {
@@ -237,6 +259,85 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {/* Expense Type Breakdown Section */}
+        {expenseTypeData && expenseTypeData.expense_types && expenseTypeData.expense_types.length > 0 && (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+              Expense Breakdown by Type
+            </Text>
+            <Text style={[styles.sectionSubtitle, { color: settings.dark_mode ? '#ccc' : '#666' }]}>
+              {formatCurrency(expenseTypeData.total_expenses)} total expenses
+            </Text>
+            
+            <View style={styles.expenseTypeContainer}>
+              {expenseTypeData.expense_types.map((type: any, index: number) => {
+                const getTypeIcon = (typeName: string) => {
+                  switch (typeName) {
+                    case 'need': return 'basket-outline';
+                    case 'want': return 'heart-outline';  
+                    case 'investment': return 'trending-up-outline';
+                    default: return 'help-circle-outline';
+                  }
+                };
+
+                const getTypeColor = (typeName: string) => {
+                  switch (typeName) {
+                    case 'need': return '#4ECDC4';
+                    case 'want': return '#FF6B6B';
+                    case 'investment': return '#45B7D1';
+                    default: return '#999';
+                  }
+                };
+
+                return (
+                  <View key={index} style={[
+                    styles.expenseTypeCard,
+                    { backgroundColor: settings.dark_mode ? '#1e1e1e' : '#fff' }
+                  ]}>
+                    <View style={styles.expenseTypeLeft}>
+                      <View style={[
+                        styles.expenseTypeIcon,
+                        { backgroundColor: getTypeColor(type.type) }
+                      ]}>
+                        <Ionicons 
+                          name={getTypeIcon(type.type) as any}
+                          size={20} 
+                          color="#fff" 
+                        />
+                      </View>
+                      <View>
+                        <Text style={[
+                          styles.expenseTypeName,
+                          { color: settings.dark_mode ? '#fff' : '#333' }
+                        ]}>
+                          {type.type.charAt(0).toUpperCase() + type.type.slice(1)}s
+                        </Text>
+                        <Text style={styles.expenseTypeCount}>
+                          {type.count} transaction{type.count !== 1 ? 's' : ''}
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.expenseTypeRight}>
+                      <Text style={[
+                        styles.expenseTypePercentage,
+                        { color: getTypeColor(type.type) }
+                      ]}>
+                        {type.percentage}%
+                      </Text>
+                      <Text style={[
+                        styles.expenseTypeAmount,
+                        { color: settings.dark_mode ? '#fff' : '#333' }
+                      ]}>
+                        {formatCurrency(type.amount)}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        )}
+
         {/* Category Spending Section */}
         {categorySpending.length > 0 && (
           <View style={styles.section}>
@@ -344,6 +445,60 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 16,
   },
+  sectionSubtitle: {
+    fontSize: 14,
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  expenseTypeContainer: {
+    gap: 12,
+  },
+  expenseTypeCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  expenseTypeLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  expenseTypeIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  expenseTypeName: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  expenseTypeCount: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
+  },
+  expenseTypeRight: {
+    alignItems: 'flex-end',
+  },
+  expenseTypePercentage: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  expenseTypeAmount: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginTop: 2,
+  },
   transactionItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -415,60 +570,6 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: 20,
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    marginTop: 4,
-    marginBottom: 16,
-  },
-  expenseTypeContainer: {
-    gap: 12,
-  },
-  expenseTypeCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  expenseTypeLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  expenseTypeIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  expenseTypeName: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  expenseTypeCount: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 2,
-  },
-  expenseTypeRight: {
-    alignItems: 'flex-end',
-  },
-  expenseTypePercentage: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  expenseTypeAmount: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginTop: 2,
   },
   sectionHeader: {
     marginBottom: 16,
