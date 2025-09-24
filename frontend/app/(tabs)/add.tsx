@@ -217,6 +217,7 @@ export default function AddExpenseScreen() {
         category_id: selectedCategory.id,
         category_name: selectedCategory.name,
         transaction_type: transactionType,
+        expense_type: transactionType === 'expense' ? expenseType : 'need',
         description: description.trim(),
         currency: settings.default_currency,
         transaction_date: selectedDate.toISOString().split('T')[0],
