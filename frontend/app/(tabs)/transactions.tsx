@@ -516,6 +516,46 @@ export default function TransactionsScreen() {
                   </TouchableOpacity>
                 </View>
 
+                {/* Expense Type Selection - Only for expenses */}
+                {editType === 'expense' && (
+                  <View style={styles.inputGroup}>
+                    <Text style={[styles.inputLabel, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                      Expense Type
+                    </Text>
+                    <View style={styles.expenseTypeContainer}>
+                      {(['need', 'want', 'investment'] as const).map((type) => (
+                        <TouchableOpacity
+                          key={type}
+                          style={[
+                            styles.expenseTypeButton,
+                            editExpenseType === type && styles.expenseTypeButtonActive,
+                            { 
+                              backgroundColor: editExpenseType === type ? '#FF6B6B' : (settings.dark_mode ? '#1e1e1e' : '#f0f0f0')
+                            }
+                          ]}
+                          onPress={() => setEditExpenseType(type)}
+                        >
+                          <Ionicons 
+                            name={
+                              type === 'need' ? 'basket-outline' : 
+                              type === 'want' ? 'heart-outline' : 
+                              'trending-up-outline'
+                            } 
+                            size={16} 
+                            color={editExpenseType === type ? '#fff' : (settings.dark_mode ? '#fff' : '#333')}
+                          />
+                          <Text style={[
+                            styles.expenseTypeEditText,
+                            { color: editExpenseType === type ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }
+                          ]}>
+                            {type.charAt(0).toUpperCase() + type.slice(1)}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
                 {/* Date Selection */}
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: settings.dark_mode ? '#fff' : '#333' }]}>
