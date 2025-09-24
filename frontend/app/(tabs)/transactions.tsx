@@ -19,7 +19,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { AppContext } from '../_layout';
 
 export default function TransactionsScreen() {
-  const { transactions, refreshData, settings, categories, updateTransaction, deleteTransaction } = useContext(AppContext);
+  const { transactions, refreshData, settings, categories, updateTransaction, deleteTransaction, getExpenseTypeAnalytics } = useContext(AppContext);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'7' | '30' | 90 | 'all'>('all');
   
