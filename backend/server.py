@@ -69,6 +69,7 @@ class TransactionCreate(BaseModel):
     category_id: str
     category_name: str
     transaction_type: str
+    expense_type: Optional[str] = "need"  # "need", "want", "investment" (only for expenses)
     description: Optional[str] = ""
     currency: str = "INR"
     transaction_date: date
