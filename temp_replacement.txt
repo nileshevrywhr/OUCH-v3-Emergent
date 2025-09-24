@@ -1,0 +1,21 @@
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refreshData();
+    await fetchExpenseTypeData();
+    setRefreshing(false);
+  };
+
+  // Fetch expense type data when component mounts or transactions change
+  const fetchExpenseTypeData = async () => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    const currentYear = currentDate.getFullYear();
+    
+    const data = await getExpenseTypeAnalytics(currentYear, currentMonth);
+    setExpenseTypeData(data);
+  };
+
+  React.useEffect(() => {
+    fetchExpenseTypeData();
+  }, [transactions]); // Re-fetch when transactions change
+
