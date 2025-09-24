@@ -391,6 +391,46 @@ export default function AddExpenseScreen() {
               </TouchableOpacity>
             </View>
 
+            {/* Expense Type Selection - Only for expenses */}
+            {transactionType === 'expense' && (
+              <View style={styles.inputContainer}>
+                <Text style={[styles.label, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                  Expense Type
+                </Text>
+                <View style={styles.expenseTypeContainer}>
+                  {(['need', 'want', 'investment'] as const).map((type) => (
+                    <TouchableOpacity
+                      key={type}
+                      style={[
+                        styles.expenseTypeButton,
+                        expenseType === type && styles.expenseTypeButtonActive,
+                        { 
+                          backgroundColor: expenseType === type ? '#FF6B6B' : (settings.dark_mode ? '#1e1e1e' : '#f0f0f0')
+                        }
+                      ]}
+                      onPress={() => setExpenseType(type)}
+                    >
+                      <Ionicons 
+                        name={
+                          type === 'need' ? 'basket-outline' : 
+                          type === 'want' ? 'heart-outline' : 
+                          'trending-up-outline'
+                        } 
+                        size={18} 
+                        color={expenseType === type ? '#fff' : (settings.dark_mode ? '#fff' : '#333')}
+                      />
+                      <Text style={[
+                        styles.expenseTypeText,
+                        { color: expenseType === type ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }
+                      ]}>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
+
             {/* Description Input */}
             <View style={styles.inputContainer}>
               <Text style={[styles.label, { color: settings.dark_mode ? '#fff' : '#333' }]}>
