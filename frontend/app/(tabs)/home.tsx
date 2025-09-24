@@ -30,9 +30,10 @@ export default function HomeScreen() {
 };
 
 export default function HomeScreen() {
-  const { transactions, refreshData, settings } = useContext(AppContext);
+  const { transactions, refreshData, settings, getExpenseTypeAnalytics } = useContext(AppContext);
   const [refreshing, setRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('amount_desc');
+  const [expenseTypeData, setExpenseTypeData] = useState<any>(null);
 
   const onRefresh = async () => {
     setRefreshing(true);
