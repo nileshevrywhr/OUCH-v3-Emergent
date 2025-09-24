@@ -233,6 +233,7 @@ export default function RootLayout() {
     updateTransaction,
     deleteTransaction,
     updateSettings,
+    getExpenseTypeAnalytics,
   };
 
   return (
