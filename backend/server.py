@@ -306,6 +306,56 @@ async def get_category_summary(days: int = 30):
     
     return {"categories": list(category_summary.values()), "period_days": days}
 
+@api_router.get("/analytics/expense-types/{year}/{month}")
+async def get_expense_type_analytics(year: int, month: int):
+    from datetime import datetime, timedelta
+    import calendar
+    
+    start_date = datetime(year, month, 1).date()
+    if month == 12:
+        end_date = datetime(year + 1, 1, 1).date() - timedelta(days=1)
+    else:
+        end_date = datetime(year, month + 1, 1).date() - timedelta(days=1)
+    
+    # Get expense transactions for the month
+    transactions = await db.transactions.find({
+        "transaction_date": {
+            "$gte": start_date.isoformat(),
+            "$lte": end_date.isoformat()
+        },
+        "transaction_type": "expense"
+    }).to_list(None)
+    
+    expense_type_breakdown = {}
+    total_expenses = 0
+    
+    for trans in transactions:
+        expense_type = trans.get("expense_type", "need")  # Default to "need" for older records
+        
+        if expense_type not in expense_type_breakdown:
+            expense_type_breakdown[expense_type] = {
+                "type": expense_type,
+                "amount": 0,
+                "count": 0,
+                "percentage": 0
+            }
+        
+        expense_type_breakdown[expense_type]["amount"] += trans["amount"]
+        expense_type_breakdown[expense_type]["count"] += 1
+        total_expenses += trans["amount"]
+    
+    # Calculate percentages
+    for type_data in expense_type_breakdown.values():
+        if total_expenses > 0:
+            type_data["percentage"] = round((type_data["amount"] / total_expenses) * 100, 1)
+    
+    return {
+        "month": month,
+        "year": year,
+        "total_expenses": total_expenses,
+        "expense_types": list(expense_type_breakdown.values())
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
