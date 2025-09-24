@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "OUCH - Overpriced Utilities & Costly Habits",
-    "slug": "ouch-expense-tracker",
+    "slug": "ouch-v3",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -12,8 +12,10 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSMicrophoneUsageDescription": "OUCH needs access to microphone to record voice input for tracking your overpriced utilities and costly habits.",
-        "NSSpeechRecognitionUsageDescription": "OUCH needs access to speech recognition to convert voice input to text for expense tracking."
-      }
+        "NSSpeechRecognitionUsageDescription": "OUCH needs access to speech recognition to convert voice input to text for expense tracking.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "com.bananalabs.ouchv3"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +26,8 @@
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.INTERNET"
-      ]
+      ],
+      "package": "com.bananalabs.ouchv3"
     },
     "web": {
       "bundler": "metro",
@@ -45,6 +48,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "25d9b354-36a7-4203-aa8b-7b506c867084"
+      }
+    },
+    "owner": "banana-labs"
   }
 }
