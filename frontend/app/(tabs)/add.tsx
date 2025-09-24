@@ -704,7 +704,8 @@ const styles = StyleSheet.create({
   },
   expenseTypeContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    borderRadius: 8,
+    overflow: 'hidden',
     marginTop: 8,
   },
   expenseTypeButton: {
@@ -713,8 +714,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginHorizontal: 4,
+    paddingHorizontal: 8,
+    marginHorizontal: 2,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: 'transparent',
