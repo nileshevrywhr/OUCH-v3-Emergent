@@ -37,6 +37,7 @@ export default function TransactionsScreen() {
   const [editDate, setEditDate] = useState(new Date());
   const [showEditDatePicker, setShowEditDatePicker] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [expenseTypeData, setExpenseTypeData] = useState<any>(null);
 
   const onRefresh = async () => {
     setRefreshing(true);
