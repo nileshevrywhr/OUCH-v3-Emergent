@@ -1002,4 +1002,33 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FF6B6B',
   },
+  expenseTypeContainer: {
+    flexDirection: 'row',
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+  expenseTypeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  expenseTypeButtonActive: {
+    borderColor: '#fff',
+  },
+  expenseTypeText: {
+    marginLeft: 6,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  expenseTypeEditText: {
+    marginLeft: 4,
+    fontSize: 12,
+    fontWeight: '600',
+  },
 });
