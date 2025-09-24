@@ -493,7 +493,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   bottomSpacing: {
-  bottomSpacing: {
     height: 20,
   },
   sectionSubtitle: {
