@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -14,11 +14,18 @@ import { AppContext } from '../_layout';
 
 type SortOption = 'amount_desc' | 'amount_asc' | 'name_asc' | 'count_desc';
 
+// Move the color function outside the component to avoid re-creation
+const getColorForCategory = (categoryName: string): string => {
+  const colors = [
+    '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+    '#F7DC6F', '#BB8FCE', '#85C1E9', '#F8C471', '#D5A6BD'
+  ];
+  let hash = 0;
 export default function HomeScreen() {
-  const { transactions, refreshData, settings } = useContext(AppContext);
+  const { transactions, refreshData, settings, getExpenseTypeAnalytics } = useContext(AppContext);
   const [refreshing, setRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('amount_desc');
-
+  const [expenseTypeData, setExpenseTypeData] = useState<any>(null);
   const onRefresh = async () => {
     setRefreshing(true);
     await refreshData();
@@ -90,16 +97,9 @@ export default function HomeScreen() {
     }
   }, [monthlyData.monthlyTransactions, sortBy]);
 
-  const getColorForCategory = (categoryName: string): string => {
-    const colors = [
-      '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
-      '#F7DC6F', '#BB8FCE', '#85C1E9', '#F8C471', '#D5A6BD'
-    ];
-    let hash = 0;
-    for (let i = 0; i < categoryName.length; i++) {
-      hash = categoryName.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return colors[Math.abs(hash) % colors.length];
+  const formatCurrency = (amount: number) => {
+    const symbol = settings.default_currency === 'INR' ? '₹' : '$';
+    return `${symbol}${amount.toLocaleString()}`;
   };
 
   const getSortIcon = (option: SortOption) => {
@@ -149,15 +149,6 @@ export default function HomeScreen() {
         </Text>
       </View>
     );
-  };
-
-      transactionCount: monthlyTransactions.length,
-    };
-  }, [transactions]);
-
-  const formatCurrency = (amount: number) => {
-    const symbol = settings.default_currency === 'INR' ? '₹' : '$';
-    return `${symbol}${amount.toLocaleString()}`;
   };
 
   const formatDate = (dateString: string) => {
@@ -245,6 +236,53 @@ export default function HomeScreen() {
             <Text style={styles.summaryAmount}>{formatCurrency(monthlyData.netAmount)}</Text>
           </View>
         </View>
+
+        {/* Category Spending Section */}
+        {categorySpending.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                Category Spending
+              </Text>
+              
+              {/* Sort Options */}
+              <View style={styles.sortContainer}>
+                {(['amount_desc', 'amount_asc', 'name_asc', 'count_desc'] as const).map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.sortButton,
+                      sortBy === option && styles.sortButtonActive,
+                      { 
+                        backgroundColor: sortBy === option ? '#FF6B6B' : (settings.dark_mode ? '#1e1e1e' : '#fff')
+                      }
+                    ]}
+                    onPress={() => setSortBy(option)}
+                  >
+                    <Ionicons 
+                      name={getSortIcon(option)} 
+                      size={14} 
+                      color={sortBy === option ? '#fff' : (settings.dark_mode ? '#fff' : '#333')} 
+                    />
+                    <Text style={[
+                      styles.sortButtonText,
+                      { color: sortBy === option ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }
+                    ]}>
+                      {getSortLabel(option)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <FlatList
+              data={categorySpending}
+              renderItem={renderCategoryItem}
+              keyExtractor={(item) => item.name}
+              scrollEnabled={false}
+            />
+          </View>
+        )}
 
         {/* Bottom spacing for better scrolling */}
         <View style={styles.bottomSpacing} />
@@ -377,5 +415,75 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: 20,
+  },
+  sectionHeader: {
+    marginBottom: 16,
+  },
+  sortContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  sortButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  sortButtonActive: {
+    borderColor: '#FF6B6B',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  sortButtonText: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginLeft: 4,
+  },
+  categoryItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    marginVertical: 4,
+    borderRadius: 12,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  categoryLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  categoryDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  categoryInfo: {
+    flex: 1,
+  },
+  categoryName: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  categoryMeta: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
+  },
+  categoryAmount: {
+    fontSize: 16,
+    fontWeight: '700',
   },
 });
