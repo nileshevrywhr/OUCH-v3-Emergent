@@ -150,6 +150,21 @@
         - agent: "testing"
         - comment: "Analytics endpoints working correctly. Tested: GET /analytics/monthly/{year}/{month} (returns income, expense, net, category breakdown, transaction count), GET /analytics/category-summary/{days} (returns category totals, averages, counts). Data aggregation logic is accurate."
 
+  - task: "Expense type analytics endpoint"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+        - agent: "main"
+        - comment: "Added new GET /api/analytics/expense-types/{year}/{month} endpoint to return expense type breakdown with percentages for monthly expenses. Ready for testing."
+        - working: true
+        - agent: "testing"
+        - comment: "EXPENSE TYPE ANALYTICS TESTING COMPLETE: All 12 tests passed (100% success rate). New endpoint GET /api/analytics/expense-types/{year}/{month} working perfectly. Verified: Response format (month, year, total_expenses, expense_types array), Expense type fields (type, amount, count, percentage), Percentage calculations (add up to 100%), Empty month handling (returns 0 total and empty array), Sample data testing (need: 33.7%, want: 14.5%, investment: 51.8%). All existing endpoints still working correctly. Feature is production-ready."
+
 ## frontend:
   - task: "Tab navigation setup"
     implemented: true
