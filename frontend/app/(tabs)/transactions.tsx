@@ -78,6 +78,7 @@ export default function TransactionsScreen() {
         category_id: editCategory.id,
         category_name: editCategory.name,
         transaction_type: editType,
+        expense_type: editType === 'expense' ? editExpenseType : 'need',
         description: editDescription.trim(),
         currency: settings.default_currency,
         transaction_date: editDate.toISOString().split('T')[0],
