@@ -493,8 +493,64 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   bottomSpacing: {
+  bottomSpacing: {
     height: 20,
   },
+  sectionSubtitle: {
+    fontSize: 14,
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  expenseTypeContainer: {
+    gap: 12,
+  },
+  expenseTypeCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  expenseTypeLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  expenseTypeIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  expenseTypeName: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  expenseTypeCount: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
+  },
+  expenseTypeRight: {
+    alignItems: 'flex-end',
+  },
+  expenseTypePercentage: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  expenseTypeAmount: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginTop: 2,
+  },
+    height: 20,
   sectionHeader: {
     marginBottom: 16,
   },
