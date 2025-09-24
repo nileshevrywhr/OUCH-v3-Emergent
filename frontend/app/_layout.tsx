@@ -46,6 +46,7 @@ export const AppContext = React.createContext<{
   updateTransaction: (id: string, transaction: Partial<Transaction>) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
   updateSettings: (newSettings: Partial<AppSettings>) => Promise<void>;
+  getExpenseTypeAnalytics: (year: number, month: number) => Promise<any>;
 }>({
   transactions: [],
   categories: [],
@@ -55,6 +56,7 @@ export const AppContext = React.createContext<{
   updateTransaction: async () => {},
   deleteTransaction: async () => {},
   updateSettings: async () => {},
+  getExpenseTypeAnalytics: async () => ({}),
 });
 
 const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
