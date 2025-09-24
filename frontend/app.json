@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ExpenseTracker",
-    "slug": "expense-tracker",
+    "name": "OUCH - Overpriced Utilities & Costly Habits",
+    "slug": "ouch-expense-tracker",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
