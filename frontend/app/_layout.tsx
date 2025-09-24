@@ -197,6 +197,25 @@ export default function RootLayout() {
     }
   };
 
+  const getExpenseTypeAnalytics = async (year: number, month: number) => {
+    try {
+      const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/analytics/expense-types/${year}/${month}`);
+      if (response.ok) {
+        return await response.json();
+      } else {
+        throw new Error('Failed to fetch expense type analytics');
+      }
+    } catch (error) {
+      console.error('Error fetching expense type analytics:', error);
+      return {
+        month,
+        year,
+        total_expenses: 0,
+        expense_types: []
+      };
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
