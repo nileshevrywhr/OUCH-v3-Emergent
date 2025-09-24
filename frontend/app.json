@@ -11,8 +11,8 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "This app needs access to microphone to record voice input for expense tracking.",
-        "NSSpeechRecognitionUsageDescription": "This app needs access to speech recognition to convert voice input to text for expense tracking."
+        "NSMicrophoneUsageDescription": "OUCH needs access to microphone to record voice input for tracking your overpriced utilities and costly habits.",
+        "NSSpeechRecognitionUsageDescription": "OUCH needs access to speech recognition to convert voice input to text for expense tracking."
       }
     },
     "android": {
