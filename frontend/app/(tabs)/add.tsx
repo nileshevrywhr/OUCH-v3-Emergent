@@ -231,6 +231,7 @@ export default function AddExpenseScreen() {
       setDescription('');
       setSelectedCategory(null);
       setTransactionType('expense');
+      setExpenseType('need');
       setSelectedDate(new Date());
     } catch (error) {
       console.error('Error adding transaction:', error);
