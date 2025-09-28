@@ -18,6 +18,7 @@ export interface Transaction {
   transaction_date: string;
   created_at: string;
   is_voice_input: boolean;
+  user: 'self' | 'spouse';
 }
 
 export interface Category {
