@@ -223,6 +223,7 @@ export default function AddExpenseScreen() {
         currency: settings.default_currency,
         transaction_date: selectedDate.toISOString().split('T')[0],
         is_voice_input: false,
+        user: selectedUser,
       });
 
       Alert.alert('Success', 'Transaction added successfully!');
