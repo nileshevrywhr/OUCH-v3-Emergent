@@ -19,6 +19,8 @@ export default function TabsLayout() {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'add') {
             iconName = focused ? 'add-circle' : 'add-circle-outline';
+          } else if (route.name === 'spouse') {
+            iconName = focused ? 'people' : 'people-outline';
           } else if (route.name === 'settings') {
             iconName = focused ? 'settings' : 'settings-outline';
           } else {
