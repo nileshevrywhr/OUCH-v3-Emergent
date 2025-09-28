@@ -471,8 +471,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
+  transactionMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  userTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginRight: 6,
+  },
+  userTagText: {
+    fontSize: 8,
+    color: '#fff',
+    fontWeight: '600',
+    marginLeft: 2,
+  },
   voiceIcon: {
-    marginTop: 2,
+    marginRight: 4,
   },
   emptyState: {
     alignItems: 'center',
