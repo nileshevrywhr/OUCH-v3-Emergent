@@ -1,0 +1,1053 @@
+import React, { useContext, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  RefreshControl,
+  TouchableOpacity,
+  Alert,
+  Modal,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { AppContext } from '../_layout';
+
+export default function TransactionsScreen() {
+  const { transactions, refreshData, settings, categories, updateTransaction, deleteTransaction, getExpenseTypeAnalytics } = useContext(AppContext);
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState<'7' | '30' | 90 | 'all'>('all');
+  
+  // State for long press actions
+  const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
+  
+  // Edit modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<any>(null);
+  const [editAmount, setEditAmount] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editCategory, setEditCategory] = useState<any>(null);
+  const [editType, setEditType] = useState<'income' | 'expense'>('expense');
+  const [editExpenseType, setEditExpenseType] = useState<'need' | 'want' | 'investment'>('need');
+  const [editUser, setEditUser] = useState<'self' | 'spouse'>('self');
+  const [editDate, setEditDate] = useState(new Date());
+  const [showEditDatePicker, setShowEditDatePicker] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [expenseTypeData, setExpenseTypeData] = useState<any>(null);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refreshData();
+    await fetchExpenseTypeData();
+    setRefreshing(false);
+  };
+
+  // Fetch expense type data when component mounts or transactions change
+  const fetchExpenseTypeData = async () => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    const currentYear = currentDate.getFullYear();
+    
+    const data = await getExpenseTypeAnalytics(currentYear, currentMonth);
+    setExpenseTypeData(data);
+  };
+
+  React.useEffect(() => {
+    fetchExpenseTypeData();
+  }, [transactions]); // Re-fetch when transactions change
+
+  // Edit transaction functions
+  const handleEditTransaction = (transaction: any) => {
+    setEditingTransaction(transaction);
+    setEditAmount(transaction.amount.toString());
+    setEditDescription(transaction.description || '');
+    setEditType(transaction.transaction_type);
+    setEditExpenseType(transaction.expense_type || 'need');
+    setEditUser(transaction.user || 'self');
+    setEditDate(new Date(transaction.transaction_date));
+    
+    // Find the category
+    const category = categories.find(cat => cat.id === transaction.category_id);
+    setEditCategory(category || null);
+    
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editAmount || !editCategory) {
+      Alert.alert('Error', 'Please fill in amount and select a category');
+      return;
+    }
+
+    const numAmount = parseFloat(editAmount);
+    if (isNaN(numAmount) || numAmount <= 0) {
+      Alert.alert('Error', 'Please enter a valid amount');
+      return;
+    }
+
+    try {
+      await updateTransaction(editingTransaction.id, {
+        amount: numAmount,
+        category_id: editCategory.id,
+        category_name: editCategory.name,
+        transaction_type: editType,
+        expense_type: editType === 'expense' ? editExpenseType : 'need',
+        description: editDescription.trim(),
+        currency: settings.default_currency,
+        transaction_date: editDate.toISOString().split('T')[0],
+        user: editUser,
+      });
+      
+      Alert.alert('Success', 'Transaction updated successfully!');
+      setShowEditModal(false);
+    } catch (error) {
+      console.error('Error updating transaction:', error);
+      Alert.alert('Error', 'Failed to update transaction. Please try again.');
+    }
+  };
+
+  const handleDeleteTransaction = (transaction: any) => {
+    Alert.alert(
+      'Delete Transaction',
+      `Are you sure you want to delete this ${transaction.transaction_type} of ${formatCurrency(transaction.amount)}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteTransaction(transaction.id);
+              Alert.alert('Success', 'Transaction deleted successfully!');
+            } catch (error) {
+              console.error('Error deleting transaction:', error);
+              Alert.alert('Error', 'Failed to delete transaction. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // Filter and sort transactions by selected period
+  const getFilteredTransactions = () => {
+    if (selectedPeriod === 'all') {
+      // For "All" view: Sort by recently added/edited (creation timestamp)
+      return [...transactions].sort((a, b) => {
+        // Sort by created_at timestamp (most recent first)
+        const dateA = new Date(a.created_at || a.transaction_date);
+        const dateB = new Date(b.created_at || b.transaction_date);
+        return dateB.getTime() - dateA.getTime();
+      });
+    }
+    
+    const days = parseInt(selectedPeriod.toString());
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    
+    // For period filters: Filter by date range and sort by transaction date (newest first)
+    return transactions
+      .filter(t => new Date(t.transaction_date) >= cutoffDate)
+      .sort((a, b) => {
+        // Primary sort: by transaction date (newest first)
+        const dateA = new Date(a.transaction_date);
+        const dateB = new Date(b.transaction_date);
+        const dateDiff = dateB.getTime() - dateA.getTime();
+        
+        // Secondary sort: by amount (highest first) if same date
+        if (dateDiff === 0) {
+          return b.amount - a.amount;
+        }
+        
+        return dateDiff;
+      });
+  };
+
+  const filteredTransactions = getFilteredTransactions();
+
+  const formatCurrency = (amount: number) => {
+    const symbol = settings.default_currency === 'INR' ? '₹' : '$';
+    return `${symbol}${amount.toLocaleString()}`;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined,
+      });
+    }
+  };
+
+  // Handle long press to show actions
+  const handleLongPress = (transactionId: string) => {
+    setSelectedTransactionId(selectedTransactionId === transactionId ? null : transactionId);
+  };
+
+  const renderTransaction = ({ item }: { item: any }) => {
+    const isSelected = selectedTransactionId === item.id;
+    
+    return (
+      <TouchableOpacity
+        style={[
+          styles.transactionItem,
+          { backgroundColor: settings.dark_mode ? '#1e1e1e' : '#fff' },
+          isSelected && styles.transactionItemSelected
+        ]}
+        onLongPress={() => handleLongPress(item.id)}
+        onPress={() => isSelected ? setSelectedTransactionId(null) : null}
+        delayLongPress={500}
+      >
+        <View style={styles.transactionContent}>
+          <View style={styles.transactionLeft}>
+            <View style={[
+              styles.categoryIndicator,
+              { backgroundColor: item.transaction_type === 'income' ? '#4ECDC4' : '#FF6B6B' }
+            ]}>
+              <Ionicons 
+                name={item.transaction_type === 'income' ? 'arrow-up' : 'arrow-down'} 
+                size={16} 
+                color="#fff" 
+              />
+            </View>
+            <View style={styles.transactionDetails}>
+              <Text style={[styles.transactionCategory, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                {item.category_name}
+              </Text>
+              <Text style={styles.transactionDate}>
+                {formatDate(item.transaction_date)}
+              </Text>
+              {item.description && (
+                <Text style={styles.transactionDescription} numberOfLines={2}>
+                  {item.description}
+                </Text>
+              )}
+            </View>
+          </View>
+          <View style={styles.transactionRight}>
+            <Text style={[
+              styles.transactionAmount,
+              { color: item.transaction_type === 'income' ? '#4ECDC4' : '#FF6B6B' }
+            ]}>
+              {item.transaction_type === 'income' ? '+' : '-'}{formatCurrency(item.amount)}
+            </Text>
+            <View style={styles.transactionMeta}>
+              {item.is_voice_input && (
+                <Ionicons name="mic" size={12} color="#999" style={styles.voiceIcon} />
+              )}
+              <Text style={styles.transactionCurrency}>
+                {item.currency}
+              </Text>
+            </View>
+          </View>
+        </View>
+        
+        {/* Action buttons overlay when selected */}
+        {isSelected && (
+          <View style={styles.actionOverlay}>
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => {
+                setSelectedTransactionId(null);
+                handleEditTransaction(item);
+              }}
+            >
+              <Ionicons name="create-outline" size={20} color="#fff" />
+              <Text style={styles.actionButtonText}>Edit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={() => {
+                setSelectedTransactionId(null);
+                handleDeleteTransaction(item);
+              }}
+            >
+              <Ionicons name="trash-outline" size={20} color="#fff" />
+              <Text style={styles.actionButtonText}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
+  const renderEmptyState = () => (
+    <View style={styles.emptyState}>
+      <Ionicons name="receipt-outline" size={64} color="#ccc" />
+      <Text style={styles.emptyText}>No transactions found</Text>
+      <Text style={styles.emptySubtext}>
+        {selectedPeriod === 'all' 
+          ? 'Add your first transaction to get started' 
+          : `No transactions in the last ${selectedPeriod} days`
+        }
+      </Text>
+    </View>
+  );
+
+  // Group transactions by date
+  const groupTransactionsByDate = () => {
+    const groups: { [key: string]: any[] } = {};
+    
+    filteredTransactions.forEach(transaction => {
+      const dateKey = formatDate(transaction.transaction_date);
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
+      }
+      groups[dateKey].push(transaction);
+    });
+
+    // Sort transactions within each date group
+    Object.keys(groups).forEach(dateKey => {
+      groups[dateKey].sort((a, b) => {
+        if (selectedPeriod === 'all') {
+          // For "All" view: Sort by creation time (recently added/edited first)
+          const dateA = new Date(a.created_at || a.transaction_date);
+          const dateB = new Date(b.created_at || b.transaction_date);
+          return dateB.getTime() - dateA.getTime();
+        } else {
+          // For period filters: Sort by amount (highest first) within same date
+          return b.amount - a.amount;
+        }
+      });
+    });
+
+    // Sort date groups by date (most recent first)
+    const sortedEntries = Object.entries(groups).sort(([dateA], [dateB]) => {
+      // Handle special date labels
+      const getDatePriority = (dateLabel: string) => {
+        if (dateLabel === 'Today') return 0;
+        if (dateLabel === 'Yesterday') return 1;
+        return 2;
+      };
+      
+      const priorityA = getDatePriority(dateA);
+      const priorityB = getDatePriority(dateB);
+      
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+      
+      // For other dates, parse and sort by actual date
+      if (priorityA === 2 && priorityB === 2) {
+        // Extract dates from groups to sort by actual transaction date
+        const transactionsA = groups[dateA];
+        const transactionsB = groups[dateB];
+        if (transactionsA.length > 0 && transactionsB.length > 0) {
+          const actualDateA = new Date(transactionsA[0].transaction_date);
+          const actualDateB = new Date(transactionsB[0].transaction_date);
+          return actualDateB.getTime() - actualDateA.getTime();
+        }
+      }
+      
+      return 0;
+    });
+
+    return sortedEntries.map(([date, items]) => ({
+      date,
+      data: items,
+      totalAmount: items.reduce((sum, item) => {
+        return item.transaction_type === 'expense' 
+          ? sum - item.amount 
+          : sum + item.amount;
+      }, 0)
+    }));
+  };
+
+  const groupedTransactions = groupTransactionsByDate();
+
+  const renderDateGroup = ({ item }: { item: any }) => (
+    <View style={styles.dateGroup}>
+      <View style={styles.dateHeader}>
+        <Text style={[styles.dateText, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+          {item.date}
+        </Text>
+        <Text style={[
+          styles.dateTotalText,
+          { color: item.totalAmount >= 0 ? '#4ECDC4' : '#FF6B6B' }
+        ]}>
+          {item.totalAmount >= 0 ? '+' : ''}{formatCurrency(Math.abs(item.totalAmount))}
+        </Text>
+      </View>
+      {item.data.map((transaction: any) => 
+        <View key={transaction.id}>
+          {renderTransaction({ item: transaction })}
+        </View>
+      )}
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: settings.dark_mode ? '#121212' : '#f8f9fa' }]}>
+        <View style={styles.header}>
+          <Text style={[styles.headerTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+            Transactions
+          </Text>
+          <Text style={[styles.headerSubtitle, { color: settings.dark_mode ? '#ccc' : '#666' }]}>
+            {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? 's' : ''}
+          </Text>
+        </View>
+
+        {/* Period Filter */}
+        <View style={styles.filterContainer}>
+          <View style={styles.periodSelector}>
+            {(['7', '30', '90', 'all'] as const).map((period) => (
+              <TouchableOpacity
+                key={period}
+                style={[
+                  styles.periodButton,
+                  selectedPeriod === period && styles.periodButtonActive,
+                  { 
+                    backgroundColor: selectedPeriod === period ? '#FF6B6B' : (settings.dark_mode ? '#1e1e1e' : '#fff')
+                  }
+                ]}
+                onPress={() => setSelectedPeriod(period)}
+              >
+                <Text style={[
+                  styles.periodButtonText,
+                  { color: selectedPeriod === period ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }
+                ]}>
+                  {period === 'all' ? 'Recent' : `${period}d`}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Transactions List */}
+        <FlatList
+          data={groupedTransactions}
+          renderItem={renderDateGroup}
+          keyExtractor={(item) => item.date}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          ListEmptyComponent={renderEmptyState}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={filteredTransactions.length === 0 ? styles.emptyContainer : undefined}
+        />
+
+        {/* Edit Transaction Modal */}
+        <Modal
+          visible={showEditModal}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => setShowEditModal(false)}
+        >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ flex: 1 }}
+          >
+            <SafeAreaView style={[styles.modalContainer, { backgroundColor: settings.dark_mode ? '#121212' : '#fff' }]}>
+              <View style={styles.modalHeader}>
+                <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                  <Text style={[styles.modalCancelButton, { color: settings.dark_mode ? '#ccc' : '#666' }]}>
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+                <Text style={[styles.modalTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                  Edit Transaction
+                </Text>
+                <TouchableOpacity onPress={handleSaveEdit}>
+                  <Text style={styles.modalSaveButton}>Save</Text>
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView style={styles.modalContent}>
+                {/* Amount Input */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                    Amount
+                  </Text>
+                  <View style={styles.amountContainer}>
+                    <TouchableOpacity
+                      style={[
+                        styles.typeButton,
+                        editType === 'expense' && styles.typeButtonActive,
+                        { backgroundColor: editType === 'expense' ? '#FF6B6B' : (settings.dark_mode ? '#1e1e1e' : '#f0f0f0') }
+                      ]}
+                      onPress={() => setEditType('expense')}
+                    >
+                      <Text style={[styles.typeButtonText, { color: editType === 'expense' ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }]}>
+                        Expense
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.typeButton,
+                        editType === 'income' && styles.typeButtonActive,
+                        { backgroundColor: editType === 'income' ? '#4ECDC4' : (settings.dark_mode ? '#1e1e1e' : '#f0f0f0') }
+                      ]}
+                      onPress={() => setEditType('income')}
+                    >
+                      <Text style={[styles.typeButtonText, { color: editType === 'income' ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }]}>
+                        Income
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  <TextInput
+                    style={[
+                      styles.amountInput,
+                      { 
+                        backgroundColor: settings.dark_mode ? '#1e1e1e' : '#f8f9fa',
+                        color: settings.dark_mode ? '#fff' : '#333',
+                        borderColor: editType === 'income' ? '#4ECDC4' : '#FF6B6B'
+                      }
+                    ]}
+                    value={editAmount}
+                    onChangeText={setEditAmount}
+                    placeholder="Enter amount"
+                    placeholderTextColor={settings.dark_mode ? '#666' : '#999'}
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                {/* Category Selection */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                    Category
+                  </Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.categoryButton,
+                      { backgroundColor: settings.dark_mode ? '#1e1e1e' : '#f8f9fa' }
+                    ]}
+                    onPress={() => setShowCategoryModal(true)}
+                  >
+                    <Text style={[styles.categoryButtonText, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                      {editCategory ? editCategory.name : 'Select Category'}
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color={settings.dark_mode ? '#fff' : '#333'} />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Expense Type Selection - Only for expenses */}
+                {editType === 'expense' && (
+                  <View style={styles.inputGroup}>
+                    <Text style={[styles.inputLabel, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                      Expense Type
+                    </Text>
+                    <View style={styles.expenseTypeContainer}>
+                      {(['need', 'want', 'investment'] as const).map((type) => (
+                        <TouchableOpacity
+                          key={type}
+                          style={[
+                            styles.expenseTypeButton,
+                            editExpenseType === type && styles.expenseTypeButtonActive,
+                            { 
+                              backgroundColor: editExpenseType === type ? '#FF6B6B' : (settings.dark_mode ? '#1e1e1e' : '#f0f0f0')
+                            }
+                          ]}
+                          onPress={() => setEditExpenseType(type)}
+                        >
+                          <Ionicons 
+                            name={
+                              type === 'need' ? 'basket-outline' : 
+                              type === 'want' ? 'heart-outline' : 
+                              'trending-up-outline'
+                            } 
+                            size={16} 
+                            color={editExpenseType === type ? '#fff' : (settings.dark_mode ? '#fff' : '#333')}
+                          />
+                          <Text style={[
+                            styles.expenseTypeEditText,
+                            { color: editExpenseType === type ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }
+                          ]}>
+                            {type.charAt(0).toUpperCase() + type.slice(1)}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                {/* Date Selection */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                    Date
+                  </Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.dateButton,
+                      { backgroundColor: settings.dark_mode ? '#1e1e1e' : '#f8f9fa' }
+                    ]}
+                    onPress={() => setShowEditDatePicker(true)}
+                  >
+                    <Text style={[styles.dateButtonText, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                      {editDate.toLocaleDateString()}
+                    </Text>
+                    <Ionicons name="calendar-outline" size={20} color={settings.dark_mode ? '#fff' : '#333'} />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Description */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                    Description (Optional)
+                  </Text>
+                  <TextInput
+                    style={[
+                      styles.descriptionInput,
+                      { 
+                        backgroundColor: settings.dark_mode ? '#1e1e1e' : '#f8f9fa',
+                        color: settings.dark_mode ? '#fff' : '#333'
+                      }
+                    ]}
+                    value={editDescription}
+                    onChangeText={setEditDescription}
+                    placeholder="Add a note..."
+                    placeholderTextColor={settings.dark_mode ? '#666' : '#999'}
+                    multiline
+                  />
+                </View>
+              </ScrollView>
+
+              {/* Date Picker */}
+              {showEditDatePicker && (
+                <DateTimePicker
+                  value={editDate}
+                  mode="date"
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    setShowEditDatePicker(false);
+                    if (selectedDate) {
+                      setEditDate(selectedDate);
+                    }
+                  }}
+                />
+              )}
+
+              {/* Category Modal */}
+              <Modal
+                visible={showCategoryModal}
+                animationType="slide"
+                presentationStyle="pageSheet"
+                onRequestClose={() => setShowCategoryModal(false)}
+              >
+                <SafeAreaView style={[styles.modalContainer, { backgroundColor: settings.dark_mode ? '#121212' : '#fff' }]}>
+                  <View style={styles.modalHeader}>
+                    <TouchableOpacity onPress={() => setShowCategoryModal(false)}>
+                      <Text style={[styles.modalCancelButton, { color: settings.dark_mode ? '#ccc' : '#666' }]}>
+                        Cancel
+                      </Text>
+                    </TouchableOpacity>
+                    <Text style={[styles.modalTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                      Select Category
+                    </Text>
+                    <View style={{ width: 60 }} />
+                  </View>
+                  <FlatList
+                    data={categories}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        style={[
+                          styles.categoryItem,
+                          { backgroundColor: settings.dark_mode ? '#1e1e1e' : '#f8f9fa' },
+                          editCategory?.id === item.id && styles.categoryItemSelected
+                        ]}
+                        onPress={() => {
+                          setEditCategory(item);
+                          setShowCategoryModal(false);
+                        }}
+                      >
+                        <Text style={[
+                          styles.categoryItemText,
+                          { color: settings.dark_mode ? '#fff' : '#333' },
+                          editCategory?.id === item.id && styles.categoryItemTextSelected
+                        ]}>
+                          {item.name}
+                        </Text>
+                        {editCategory?.id === item.id && (
+                          <Ionicons name="checkmark" size={20} color="#FF6B6B" />
+                        )}
+                      </TouchableOpacity>
+                    )}
+                  />
+                </SafeAreaView>
+              </Modal>
+            </SafeAreaView>
+          </KeyboardAvoidingView>
+        </Modal>
+      </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  header: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    marginTop: 4,
+  },
+  filterContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  periodSelector: {
+    flexDirection: 'row',
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#e0e0e0',
+  },
+  periodButton: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  periodButtonActive: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  periodButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  dateGroup: {
+    marginBottom: 16,
+  },
+  dateHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginBottom: 8,
+  },
+  dateText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  dateTotalText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  transactionItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    marginVertical: 2,
+    marginHorizontal: 16,
+    borderRadius: 12,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  transactionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  categoryIndicator: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  transactionDetails: {
+    flex: 1,
+  },
+  transactionCategory: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  transactionDate: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
+  },
+  transactionDescription: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+    lineHeight: 16,
+  },
+  transactionRight: {
+    alignItems: 'flex-end',
+  },
+  transactionAmount: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  transactionMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  voiceIcon: {
+    marginRight: 4,
+  },
+  transactionCurrency: {
+    fontSize: 10,
+    color: '#999',
+    fontWeight: '500',
+  },
+  emptyContainer: {
+    flex: 1,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 64,
+  },
+  emptyText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#999',
+    marginTop: 16,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#ccc',
+    marginTop: 8,
+    textAlign: 'center',
+    maxWidth: 250,
+  },
+  // Long press action styles
+  transactionItemSelected: {
+    backgroundColor: '#f0f8ff',
+    borderColor: '#4ECDC4',
+    borderWidth: 2,
+  },
+  transactionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  actionOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 12,
+    zIndex: 10,
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#4ECDC4',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginHorizontal: 10,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FF6B6B',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginHorizontal: 10,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  // Modal styles
+  modalContainer: {
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  modalCancelButton: {
+    fontSize: 16,
+  },
+  modalSaveButton: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FF6B6B',
+  },
+  modalContent: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  inputGroup: {
+    marginBottom: 24,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  amountContainer: {
+    flexDirection: 'row',
+    marginBottom: 12,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  typeButton: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  typeButtonActive: {
+    borderColor: '#fff',
+  },
+  typeButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  amountInput: {
+    fontSize: 24,
+    fontWeight: '700',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 2,
+    textAlign: 'center',
+  },
+  categoryButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  categoryButtonText: {
+    fontSize: 16,
+  },
+  dateButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  dateButtonText: {
+    fontSize: 16,
+  },
+  descriptionInput: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  categoryItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    marginHorizontal: 16,
+    marginVertical: 4,
+    borderRadius: 8,
+  },
+  categoryItemSelected: {
+    backgroundColor: '#FF6B6B20',
+    borderWidth: 1,
+    borderColor: '#FF6B6B',
+  },
+  categoryItemText: {
+    fontSize: 16,
+  },
+  categoryItemTextSelected: {
+    fontWeight: '600',
+    color: '#FF6B6B',
+  },
+  expenseTypeContainer: {
+    flexDirection: 'row',
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+  expenseTypeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  expenseTypeButtonActive: {
+    borderColor: '#fff',
+  },
+  expenseTypeText: {
+    marginLeft: 6,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  expenseTypeEditText: {
+    marginLeft: 4,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+});
