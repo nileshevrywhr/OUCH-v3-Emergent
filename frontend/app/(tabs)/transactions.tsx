@@ -877,6 +877,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 4,
   },
+  userTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginRight: 6,
+  },
+  userTagText: {
+    fontSize: 8,
+    color: '#fff',
+    fontWeight: '600',
+    marginLeft: 2,
+  },
   voiceIcon: {
     marginRight: 4,
   },
