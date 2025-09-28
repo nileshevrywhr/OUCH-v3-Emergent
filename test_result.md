@@ -267,3 +267,18 @@
         - working: true
         - agent: "testing"
         - comment: "BACKEND EDIT/DELETE TESTING COMPLETE: All 18 tests passed (100% success rate). Thoroughly tested PUT /api/transactions/{id} and DELETE /api/transactions/{id} endpoints. Verified: Amount updates (₹150.75 → ₹275.50), Category changes (Rent → EMI), Type switching (expense → income), Description updates, Date modifications (2025-09-23 → 2024-01-15). Error handling working correctly: 404 for invalid transaction IDs, 404 for invalid category IDs, 422 for malformed data. Delete operations verified with database confirmation. Backend is fully ready for frontend swipe edit/delete integration."
+
+  - task: "Multi-user functionality with user filtering"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+        - agent: "main"
+        - comment: "Added multi-user support to track both user's and spouse's expenses separately. The backend now supports a 'user' field (self/spouse) in transactions and filtering capabilities in GET /api/transactions and GET /api/analytics/expense-types endpoints."
+        - working: true
+        - agent: "testing"
+        - comment: "MULTI-USER FUNCTIONALITY TESTING COMPLETE: All 7 test suites passed (100% success rate). Verified: 1) Transaction creation for both 'self' and 'spouse' users with different expense types (need/want/investment), 2) User filtering in GET /api/transactions works correctly (all/self/spouse), 3) Expense type analytics with user filtering - all users, self only, spouse only, 4) Data integrity verification - individual user totals add up to combined total, expense type breakdowns are accurate. Test data: Self user (₹1850 total: need=₹650, want=₹200, investment=₹1000), Spouse user (₹1350 total: need=₹300, want=₹250, investment=₹800), Combined total=₹3200. All percentages calculated correctly. Multi-user functionality is production-ready."
