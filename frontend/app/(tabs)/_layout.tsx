@@ -67,6 +67,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="spouse"
+        options={{
+          title: 'Spouse',
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
         name="settings"
         options={{
           title: 'Settings',
