@@ -63,6 +63,7 @@ class Transaction(BaseModel):
     transaction_date: date
     created_at: datetime = Field(default_factory=datetime.utcnow)
     is_voice_input: bool = False
+    user: str = "self"  # "self" or "spouse"
 
 class TransactionCreate(BaseModel):
     amount: float
