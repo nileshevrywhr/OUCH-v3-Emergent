@@ -574,6 +574,7 @@ export default function TransactionsScreen() {
                     </View>
                   </View>
 
+                )}
                 {/* User Selection */}
                 <View style={styles.inputGroup}>
                   <Text style={[styles.inputLabel, { color: settings.dark_mode ? '#fff' : '#333' }]}>
