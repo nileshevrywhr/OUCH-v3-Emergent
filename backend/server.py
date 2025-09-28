@@ -75,6 +75,7 @@ class TransactionCreate(BaseModel):
     currency: str = "INR"
     transaction_date: date
     is_voice_input: bool = False
+    user: str = "self"  # "self" or "spouse"
 
 class MonthlyAnalytics(BaseModel):
     month: int
