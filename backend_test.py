@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend API Testing Script for Expense Tracker - EDIT/DELETE FOCUS
-Focus: Testing PUT and DELETE endpoints for transactions
+Backend API Testing Script for Expense Tracker - MULTI-USER FUNCTIONALITY FOCUS
+Focus: Testing multi-user functionality with user filtering and analytics
 """
 
 import requests
@@ -25,585 +25,522 @@ def get_backend_url():
     return "http://localhost:8001/api"
 
 BASE_URL = get_backend_url()
-print(f"🚀 Testing backend EDIT/DELETE functionality at: {BASE_URL}")
+print(f"🚀 Testing backend MULTI-USER functionality at: {BASE_URL}")
 
-class BackendEditDeleteTester:
+class MultiUserTestSuite:
     def __init__(self):
         self.base_url = BASE_URL
-        self.session = requests.Session()
-        self.session.headers.update({"Content-Type": "application/json"})
         self.test_results = []
         self.created_transactions = []
+        self.categories = []
         
-    def log_test(self, test_name: str, success: bool, message: str, details=None):
+    def log_result(self, test_name, success, message="", response_data=None):
         """Log test results"""
         status = "✅ PASS" if success else "❌ FAIL"
-        print(f"{status} {test_name}: {message}")
-        if details:
-            print(f"   Details: {details}")
+        print(f"{status}: {test_name}")
+        if message:
+            print(f"   {message}")
+        if response_data and not success:
+            print(f"   Response: {response_data}")
+        print()
         
         self.test_results.append({
             "test": test_name,
             "success": success,
             "message": message,
-            "details": details
+            "response": response_data
         })
     
-    def test_api_connection(self):
-        """Test basic API connectivity"""
+    def setup_test_data(self):
+        """Get categories for testing"""
         try:
-            response = self.session.get(f"{self.base_url}/", timeout=10)
+            response = requests.get(f"{self.base_url}/categories")
             if response.status_code == 200:
-                self.log_test("API Connection", True, "API is accessible")
+                self.categories = response.json()
+                self.log_result("Setup: Get Categories", True, f"Retrieved {len(self.categories)} categories")
                 return True
             else:
-                self.log_test("API Connection", False, f"API returned status {response.status_code}")
+                self.log_result("Setup: Get Categories", False, f"Status: {response.status_code}", response.text)
                 return False
         except Exception as e:
-            self.log_test("API Connection", False, f"Connection failed: {str(e)}")
+            self.log_result("Setup: Get Categories", False, f"Exception: {str(e)}")
             return False
     
-    def get_categories(self):
-        """Get available categories for testing"""
-        try:
-            response = self.session.get(f"{self.base_url}/categories", timeout=10)
-            if response.status_code == 200:
-                categories = response.json()
-                self.log_test("Get Categories", True, f"Retrieved {len(categories)} categories")
-                return categories
-            else:
-                self.log_test("Get Categories", False, f"Failed to get categories: {response.status_code}")
-                return []
-        except Exception as e:
-            self.log_test("Get Categories", False, f"Error getting categories: {str(e)}")
-            return []
-    
-    def create_test_transaction(self, categories, description="Test transaction for edit/delete"):
-        """Create a test transaction for update/delete testing"""
-        if not categories:
-            self.log_test("Create Test Transaction", False, "No categories available")
-            return None
-            
-        category = categories[0]  # Use first available category
+    def test_create_self_transactions(self):
+        """Test creating transactions for 'self' user with different expense types"""
+        print("=== Testing Self User Transaction Creation ===")
         
-        transaction_data = {
-            "amount": 150.75,
-            "category_id": category["id"],
-            "category_name": category["name"],
-            "transaction_type": "expense",
-            "description": description,
-            "currency": "INR",
-            "transaction_date": date.today().isoformat(),
-            "is_voice_input": False
-        }
-        
-        try:
-            response = self.session.post(f"{self.base_url}/transactions", 
-                                       json=transaction_data, 
-                                       timeout=10)
-            
-            if response.status_code == 200:
-                transaction = response.json()
-                self.created_transactions.append(transaction["id"])
-                self.log_test("Create Test Transaction", True, 
-                            f"Created transaction ID: {transaction['id']}")
-                return transaction
-            else:
-                self.log_test("Create Test Transaction", False, 
-                            f"Failed to create transaction: {response.status_code} - {response.text}")
-                return None
-        except Exception as e:
-            self.log_test("Create Test Transaction", False, f"Error creating transaction: {str(e)}")
-            return None
-    
-    def test_update_transaction_amount(self, transaction, categories):
-        """Test updating transaction amount"""
-        if not transaction:
-            return False
-            
-        transaction_id = transaction["id"]
-        original_amount = transaction["amount"]
-        new_amount = 275.50
-        
-        update_data = {
-            "amount": new_amount,
-            "category_id": transaction["category_id"],
-            "category_name": transaction["category_name"],
-            "transaction_type": transaction["transaction_type"],
-            "description": transaction["description"],
-            "currency": transaction["currency"],
-            "transaction_date": transaction["transaction_date"],
-            "is_voice_input": transaction["is_voice_input"]
-        }
-        
-        try:
-            response = self.session.put(f"{self.base_url}/transactions/{transaction_id}",
-                                      json=update_data,
-                                      timeout=10)
-            
-            if response.status_code == 200:
-                updated_transaction = response.json()
-                if updated_transaction["amount"] == new_amount:
-                    self.log_test("Update Transaction Amount", True,
-                                f"Amount updated from ₹{original_amount} to ₹{new_amount}")
-                    return True
-                else:
-                    self.log_test("Update Transaction Amount", False,
-                                f"Amount not updated correctly. Expected: {new_amount}, Got: {updated_transaction['amount']}")
-                    return False
-            else:
-                self.log_test("Update Transaction Amount", False,
-                            f"Update failed: {response.status_code} - {response.text}")
-                return False
-        except Exception as e:
-            self.log_test("Update Transaction Amount", False, f"Error updating amount: {str(e)}")
-            return False
-    
-    def test_update_transaction_category(self, transaction, categories):
-        """Test updating transaction category"""
-        if not transaction or len(categories) < 2:
-            return False
-            
-        transaction_id = transaction["id"]
-        original_category = transaction["category_name"]
-        
-        # Find a different category
-        new_category = None
-        for cat in categories:
-            if cat["id"] != transaction["category_id"]:
-                new_category = cat
-                break
-        
-        if not new_category:
-            self.log_test("Update Transaction Category", False, "No alternative category found")
+        if not self.categories:
+            self.log_result("Create Self Transactions", False, "No categories available")
             return False
         
-        update_data = {
-            "amount": transaction["amount"],
-            "category_id": new_category["id"],
-            "category_name": new_category["name"],
-            "transaction_type": transaction["transaction_type"],
-            "description": transaction["description"],
-            "currency": transaction["currency"],
-            "transaction_date": transaction["transaction_date"],
-            "is_voice_input": transaction["is_voice_input"]
-        }
+        # Test data for self user with different expense types
+        test_transactions = [
+            {
+                "amount": 500.0,
+                "category_id": self.categories[0]["id"],  # Rent
+                "category_name": self.categories[0]["name"],
+                "transaction_type": "expense",
+                "expense_type": "need",
+                "description": "Monthly rent payment",
+                "currency": "INR",
+                "transaction_date": "2024-01-15",
+                "user": "self"
+            },
+            {
+                "amount": 150.0,
+                "category_id": self.categories[3]["id"],  # Groceries
+                "category_name": self.categories[3]["name"],
+                "transaction_type": "expense",
+                "expense_type": "need",
+                "description": "Weekly groceries",
+                "currency": "INR",
+                "transaction_date": "2024-01-16",
+                "user": "self"
+            },
+            {
+                "amount": 200.0,
+                "category_id": self.categories[4]["id"],  # Eating Out
+                "category_name": self.categories[4]["name"],
+                "transaction_type": "expense",
+                "expense_type": "want",
+                "description": "Dinner at restaurant",
+                "currency": "INR",
+                "transaction_date": "2024-01-17",
+                "user": "self"
+            },
+            {
+                "amount": 1000.0,
+                "category_id": self.categories[1]["id"],  # EMI
+                "category_name": self.categories[1]["name"],
+                "transaction_type": "expense",
+                "expense_type": "investment",
+                "description": "Mutual fund SIP",
+                "currency": "INR",
+                "transaction_date": "2024-01-18",
+                "user": "self"
+            }
+        ]
         
-        try:
-            response = self.session.put(f"{self.base_url}/transactions/{transaction_id}",
-                                      json=update_data,
-                                      timeout=10)
-            
-            if response.status_code == 200:
-                updated_transaction = response.json()
-                if (updated_transaction["category_id"] == new_category["id"] and 
-                    updated_transaction["category_name"] == new_category["name"]):
-                    self.log_test("Update Transaction Category", True,
-                                f"Category updated from '{original_category}' to '{new_category['name']}'")
-                    return True
-                else:
-                    self.log_test("Update Transaction Category", False,
-                                f"Category not updated correctly")
-                    return False
-            else:
-                self.log_test("Update Transaction Category", False,
-                            f"Update failed: {response.status_code} - {response.text}")
-                return False
-        except Exception as e:
-            self.log_test("Update Transaction Category", False, f"Error updating category: {str(e)}")
-            return False
-    
-    def test_update_transaction_type(self, transaction, categories):
-        """Test updating transaction type"""
-        if not transaction:
-            return False
-            
-        transaction_id = transaction["id"]
-        original_type = transaction["transaction_type"]
-        new_type = "income" if original_type == "expense" else "expense"
-        
-        update_data = {
-            "amount": transaction["amount"],
-            "category_id": transaction["category_id"],
-            "category_name": transaction["category_name"],
-            "transaction_type": new_type,
-            "description": transaction["description"],
-            "currency": transaction["currency"],
-            "transaction_date": transaction["transaction_date"],
-            "is_voice_input": transaction["is_voice_input"]
-        }
-        
-        try:
-            response = self.session.put(f"{self.base_url}/transactions/{transaction_id}",
-                                      json=update_data,
-                                      timeout=10)
-            
-            if response.status_code == 200:
-                updated_transaction = response.json()
-                if updated_transaction["transaction_type"] == new_type:
-                    self.log_test("Update Transaction Type", True,
-                                f"Type updated from '{original_type}' to '{new_type}'")
-                    return True
-                else:
-                    self.log_test("Update Transaction Type", False,
-                                f"Type not updated correctly")
-                    return False
-            else:
-                self.log_test("Update Transaction Type", False,
-                            f"Update failed: {response.status_code} - {response.text}")
-                return False
-        except Exception as e:
-            self.log_test("Update Transaction Type", False, f"Error updating type: {str(e)}")
-            return False
-    
-    def test_update_transaction_description(self, transaction, categories):
-        """Test updating transaction description"""
-        if not transaction:
-            return False
-            
-        transaction_id = transaction["id"]
-        original_description = transaction["description"]
-        new_description = "Updated: Coffee at Starbucks downtown"
-        
-        update_data = {
-            "amount": transaction["amount"],
-            "category_id": transaction["category_id"],
-            "category_name": transaction["category_name"],
-            "transaction_type": transaction["transaction_type"],
-            "description": new_description,
-            "currency": transaction["currency"],
-            "transaction_date": transaction["transaction_date"],
-            "is_voice_input": transaction["is_voice_input"]
-        }
-        
-        try:
-            response = self.session.put(f"{self.base_url}/transactions/{transaction_id}",
-                                      json=update_data,
-                                      timeout=10)
-            
-            if response.status_code == 200:
-                updated_transaction = response.json()
-                if updated_transaction["description"] == new_description:
-                    self.log_test("Update Transaction Description", True,
-                                f"Description updated successfully")
-                    return True
-                else:
-                    self.log_test("Update Transaction Description", False,
-                                f"Description not updated correctly")
-                    return False
-            else:
-                self.log_test("Update Transaction Description", False,
-                            f"Update failed: {response.status_code} - {response.text}")
-                return False
-        except Exception as e:
-            self.log_test("Update Transaction Description", False, f"Error updating description: {str(e)}")
-            return False
-    
-    def test_update_transaction_date(self, transaction, categories):
-        """Test updating transaction date"""
-        if not transaction:
-            return False
-            
-        transaction_id = transaction["id"]
-        original_date = transaction["transaction_date"]
-        new_date = "2024-01-15"  # Different date
-        
-        update_data = {
-            "amount": transaction["amount"],
-            "category_id": transaction["category_id"],
-            "category_name": transaction["category_name"],
-            "transaction_type": transaction["transaction_type"],
-            "description": transaction["description"],
-            "currency": transaction["currency"],
-            "transaction_date": new_date,
-            "is_voice_input": transaction["is_voice_input"]
-        }
-        
-        try:
-            response = self.session.put(f"{self.base_url}/transactions/{transaction_id}",
-                                      json=update_data,
-                                      timeout=10)
-            
-            if response.status_code == 200:
-                updated_transaction = response.json()
-                if updated_transaction["transaction_date"] == new_date:
-                    self.log_test("Update Transaction Date", True,
-                                f"Date updated from '{original_date}' to '{new_date}'")
-                    return True
-                else:
-                    self.log_test("Update Transaction Date", False,
-                                f"Date not updated correctly")
-                    return False
-            else:
-                self.log_test("Update Transaction Date", False,
-                            f"Update failed: {response.status_code} - {response.text}")
-                return False
-        except Exception as e:
-            self.log_test("Update Transaction Date", False, f"Error updating date: {str(e)}")
-            return False
-    
-    def test_update_invalid_transaction_id(self, categories):
-        """Test updating with invalid transaction ID"""
-        invalid_id = str(uuid.uuid4())
-        
-        if not categories:
-            return False
-            
-        update_data = {
-            "amount": 100.0,
-            "category_id": categories[0]["id"],
-            "category_name": categories[0]["name"],
-            "transaction_type": "expense",
-            "description": "Test",
-            "currency": "INR",
-            "transaction_date": date.today().isoformat(),
-            "is_voice_input": False
-        }
-        
-        try:
-            response = self.session.put(f"{self.base_url}/transactions/{invalid_id}",
-                                      json=update_data,
-                                      timeout=10)
-            
-            if response.status_code == 404:
-                self.log_test("Update Invalid Transaction ID", True,
-                            "Correctly returned 404 for invalid transaction ID")
-                return True
-            else:
-                self.log_test("Update Invalid Transaction ID", False,
-                            f"Expected 404, got {response.status_code}")
-                return False
-        except Exception as e:
-            self.log_test("Update Invalid Transaction ID", False, f"Error testing invalid ID: {str(e)}")
-            return False
-    
-    def test_update_invalid_category_id(self, transaction):
-        """Test updating with invalid category ID"""
-        if not transaction:
-            return False
-            
-        transaction_id = transaction["id"]
-        invalid_category_id = str(uuid.uuid4())
-        
-        update_data = {
-            "amount": transaction["amount"],
-            "category_id": invalid_category_id,
-            "category_name": "Invalid Category",
-            "transaction_type": transaction["transaction_type"],
-            "description": transaction["description"],
-            "currency": transaction["currency"],
-            "transaction_date": transaction["transaction_date"],
-            "is_voice_input": transaction["is_voice_input"]
-        }
-        
-        try:
-            response = self.session.put(f"{self.base_url}/transactions/{transaction_id}",
-                                      json=update_data,
-                                      timeout=10)
-            
-            if response.status_code == 404:
-                self.log_test("Update Invalid Category ID", True,
-                            "Correctly returned 404 for invalid category ID")
-                return True
-            else:
-                self.log_test("Update Invalid Category ID", False,
-                            f"Expected 404, got {response.status_code}")
-                return False
-        except Exception as e:
-            self.log_test("Update Invalid Category ID", False, f"Error testing invalid category: {str(e)}")
-            return False
-    
-    def test_update_malformed_data(self, transaction):
-        """Test updating with malformed data"""
-        if not transaction:
-            return False
-            
-        transaction_id = transaction["id"]
-        
-        # Test with missing required fields
-        malformed_data = {
-            "amount": "invalid_amount",  # Should be float
-            "category_id": transaction["category_id"]
-            # Missing other required fields
-        }
-        
-        try:
-            response = self.session.put(f"{self.base_url}/transactions/{transaction_id}",
-                                      json=malformed_data,
-                                      timeout=10)
-            
-            if response.status_code in [400, 422]:  # Bad request or validation error
-                self.log_test("Update Malformed Data", True,
-                            f"Correctly rejected malformed data with status {response.status_code}")
-                return True
-            else:
-                self.log_test("Update Malformed Data", False,
-                            f"Expected 400/422, got {response.status_code}")
-                return False
-        except Exception as e:
-            self.log_test("Update Malformed Data", False, f"Error testing malformed data: {str(e)}")
-            return False
-    
-    def test_delete_transaction(self, transaction):
-        """Test deleting a transaction"""
-        if not transaction:
-            return False
-            
-        transaction_id = transaction["id"]
-        
-        try:
-            response = self.session.delete(f"{self.base_url}/transactions/{transaction_id}",
-                                         timeout=10)
-            
-            if response.status_code == 200:
-                # Verify transaction is actually deleted
-                get_response = self.session.get(f"{self.base_url}/transactions/{transaction_id}",
-                                              timeout=10)
-                
-                if get_response.status_code == 404:
-                    self.log_test("Delete Transaction", True,
-                                f"Transaction {transaction_id} successfully deleted")
-                    # Remove from our tracking list
-                    if transaction_id in self.created_transactions:
-                        self.created_transactions.remove(transaction_id)
-                    return True
-                else:
-                    self.log_test("Delete Transaction", False,
-                                "Transaction still exists after deletion")
-                    return False
-            else:
-                self.log_test("Delete Transaction", False,
-                            f"Delete failed: {response.status_code} - {response.text}")
-                return False
-        except Exception as e:
-            self.log_test("Delete Transaction", False, f"Error deleting transaction: {str(e)}")
-            return False
-    
-    def test_delete_invalid_transaction_id(self):
-        """Test deleting with invalid transaction ID"""
-        invalid_id = str(uuid.uuid4())
-        
-        try:
-            response = self.session.delete(f"{self.base_url}/transactions/{invalid_id}",
-                                         timeout=10)
-            
-            if response.status_code == 404:
-                self.log_test("Delete Invalid Transaction ID", True,
-                            "Correctly returned 404 for invalid transaction ID")
-                return True
-            else:
-                self.log_test("Delete Invalid Transaction ID", False,
-                            f"Expected 404, got {response.status_code}")
-                return False
-        except Exception as e:
-            self.log_test("Delete Invalid Transaction ID", False, f"Error testing invalid delete: {str(e)}")
-            return False
-    
-    def cleanup_test_data(self):
-        """Clean up any remaining test transactions"""
-        print("\n🧹 Cleaning up test data...")
-        for transaction_id in self.created_transactions[:]:
+        success_count = 0
+        for i, transaction_data in enumerate(test_transactions):
             try:
-                response = self.session.delete(f"{self.base_url}/transactions/{transaction_id}",
-                                             timeout=10)
+                response = requests.post(f"{self.base_url}/transactions", json=transaction_data)
                 if response.status_code == 200:
-                    print(f"   Cleaned up transaction: {transaction_id}")
-                    self.created_transactions.remove(transaction_id)
+                    created_transaction = response.json()
+                    self.created_transactions.append(created_transaction)
+                    
+                    # Verify user field is saved correctly
+                    if created_transaction.get("user") == "self":
+                        self.log_result(f"Create Self Transaction {i+1} ({transaction_data['expense_type']})", True, 
+                                      f"Amount: ₹{transaction_data['amount']}, Type: {transaction_data['expense_type']}")
+                        success_count += 1
+                    else:
+                        self.log_result(f"Create Self Transaction {i+1}", False, 
+                                      f"User field incorrect: expected 'self', got '{created_transaction.get('user')}'")
+                else:
+                    self.log_result(f"Create Self Transaction {i+1}", False, 
+                                  f"Status: {response.status_code}", response.text)
             except Exception as e:
-                print(f"   Failed to cleanup transaction {transaction_id}: {str(e)}")
+                self.log_result(f"Create Self Transaction {i+1}", False, f"Exception: {str(e)}")
+        
+        return success_count == len(test_transactions)
+    
+    def test_create_spouse_transactions(self):
+        """Test creating transactions for 'spouse' user with different expense types"""
+        print("=== Testing Spouse User Transaction Creation ===")
+        
+        if not self.categories:
+            self.log_result("Create Spouse Transactions", False, "No categories available")
+            return False
+        
+        # Test data for spouse user with different expense types
+        test_transactions = [
+            {
+                "amount": 300.0,
+                "category_id": self.categories[2]["id"],  # Travel
+                "category_name": self.categories[2]["name"],
+                "transaction_type": "expense",
+                "expense_type": "need",
+                "description": "Bus fare to office",
+                "currency": "INR",
+                "transaction_date": "2024-01-15",
+                "user": "spouse"
+            },
+            {
+                "amount": 250.0,
+                "category_id": self.categories[8]["id"],  # Grooming & PC
+                "category_name": self.categories[8]["name"],
+                "transaction_type": "expense",
+                "expense_type": "want",
+                "description": "Haircut and styling",
+                "currency": "INR",
+                "transaction_date": "2024-01-16",
+                "user": "spouse"
+            },
+            {
+                "amount": 800.0,
+                "category_id": self.categories[1]["id"],  # EMI
+                "category_name": self.categories[1]["name"],
+                "transaction_type": "expense",
+                "expense_type": "investment",
+                "description": "Stock market investment",
+                "currency": "INR",
+                "transaction_date": "2024-01-17",
+                "user": "spouse"
+            }
+        ]
+        
+        success_count = 0
+        for i, transaction_data in enumerate(test_transactions):
+            try:
+                response = requests.post(f"{self.base_url}/transactions", json=transaction_data)
+                if response.status_code == 200:
+                    created_transaction = response.json()
+                    self.created_transactions.append(created_transaction)
+                    
+                    # Verify user field is saved correctly
+                    if created_transaction.get("user") == "spouse":
+                        self.log_result(f"Create Spouse Transaction {i+1} ({transaction_data['expense_type']})", True, 
+                                      f"Amount: ₹{transaction_data['amount']}, Type: {transaction_data['expense_type']}")
+                        success_count += 1
+                    else:
+                        self.log_result(f"Create Spouse Transaction {i+1}", False, 
+                                      f"User field incorrect: expected 'spouse', got '{created_transaction.get('user')}'")
+                else:
+                    self.log_result(f"Create Spouse Transaction {i+1}", False, 
+                                  f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result(f"Create Spouse Transaction {i+1}", False, f"Exception: {str(e)}")
+        
+        return success_count == len(test_transactions)
+    
+    def test_user_filtering_transactions(self):
+        """Test GET /api/transactions with user filtering"""
+        print("=== Testing User Filtering in Transactions ===")
+        
+        success_count = 0
+        total_tests = 3
+        
+        # Test 1: Get all transactions (no user filter)
+        try:
+            response = requests.get(f"{self.base_url}/transactions")
+            if response.status_code == 200:
+                all_transactions = response.json()
+                self_count = sum(1 for t in all_transactions if t.get("user") == "self")
+                spouse_count = sum(1 for t in all_transactions if t.get("user") == "spouse")
+                
+                self.log_result("Get All Transactions", True, 
+                              f"Total: {len(all_transactions)}, Self: {self_count}, Spouse: {spouse_count}")
+                success_count += 1
+            else:
+                self.log_result("Get All Transactions", False, f"Status: {response.status_code}", response.text)
+        except Exception as e:
+            self.log_result("Get All Transactions", False, f"Exception: {str(e)}")
+        
+        # Test 2: Get only self transactions
+        try:
+            response = requests.get(f"{self.base_url}/transactions?user=self")
+            if response.status_code == 200:
+                self_transactions = response.json()
+                
+                # Verify all transactions belong to self user
+                all_self = all(t.get("user") == "self" for t in self_transactions)
+                if all_self:
+                    self.log_result("Get Self Transactions", True, 
+                                  f"Retrieved {len(self_transactions)} self transactions")
+                    success_count += 1
+                else:
+                    non_self = [t.get("user") for t in self_transactions if t.get("user") != "self"]
+                    self.log_result("Get Self Transactions", False, 
+                                  f"Found non-self transactions: {non_self}")
+            else:
+                self.log_result("Get Self Transactions", False, f"Status: {response.status_code}", response.text)
+        except Exception as e:
+            self.log_result("Get Self Transactions", False, f"Exception: {str(e)}")
+        
+        # Test 3: Get only spouse transactions
+        try:
+            response = requests.get(f"{self.base_url}/transactions?user=spouse")
+            if response.status_code == 200:
+                spouse_transactions = response.json()
+                
+                # Verify all transactions belong to spouse user
+                all_spouse = all(t.get("user") == "spouse" for t in spouse_transactions)
+                if all_spouse:
+                    self.log_result("Get Spouse Transactions", True, 
+                                  f"Retrieved {len(spouse_transactions)} spouse transactions")
+                    success_count += 1
+                else:
+                    non_spouse = [t.get("user") for t in spouse_transactions if t.get("user") != "spouse"]
+                    self.log_result("Get Spouse Transactions", False, 
+                                  f"Found non-spouse transactions: {non_spouse}")
+            else:
+                self.log_result("Get Spouse Transactions", False, f"Status: {response.status_code}", response.text)
+        except Exception as e:
+            self.log_result("Get Spouse Transactions", False, f"Exception: {str(e)}")
+        
+        return success_count == total_tests
+    
+    def test_expense_type_analytics_all_users(self):
+        """Test expense type analytics without user filtering (all users)"""
+        print("=== Testing Expense Type Analytics - All Users ===")
+        
+        try:
+            response = requests.get(f"{self.base_url}/analytics/expense-types/2024/1")
+            if response.status_code == 200:
+                analytics = response.json()
+                
+                # Verify response structure
+                required_fields = ["month", "year", "total_expenses", "expense_types"]
+                missing_fields = [field for field in required_fields if field not in analytics]
+                
+                if missing_fields:
+                    self.log_result("Expense Analytics All Users - Structure", False, 
+                                  f"Missing fields: {missing_fields}")
+                    return False
+                
+                # Verify data
+                expense_types = analytics["expense_types"]
+                total_expenses = analytics["total_expenses"]
+                
+                # Verify percentages add up to 100% (with tolerance for rounding)
+                total_percentage = sum(et["percentage"] for et in expense_types)
+                percentage_valid = abs(total_percentage - 100.0) < 0.1
+                
+                if percentage_valid and total_expenses > 0:
+                    self.log_result("Expense Analytics All Users", True, 
+                                  f"Total: ₹{total_expenses}, Types: {len(expense_types)}, Percentages sum: {total_percentage}%")
+                    
+                    # Log breakdown
+                    for et in expense_types:
+                        print(f"   {et['type']}: ₹{et['amount']} ({et['percentage']}%) - {et['count']} transactions")
+                    
+                    return True
+                else:
+                    self.log_result("Expense Analytics All Users", False, 
+                                  f"Invalid data - Total: ₹{total_expenses}, Percentage sum: {total_percentage}%")
+                    return False
+            else:
+                self.log_result("Expense Analytics All Users", False, f"Status: {response.status_code}", response.text)
+                return False
+        except Exception as e:
+            self.log_result("Expense Analytics All Users", False, f"Exception: {str(e)}")
+            return False
+    
+    def test_expense_type_analytics_self_user(self):
+        """Test expense type analytics with self user filtering"""
+        print("=== Testing Expense Type Analytics - Self User ===")
+        
+        try:
+            response = requests.get(f"{self.base_url}/analytics/expense-types/2024/1?user=self")
+            if response.status_code == 200:
+                analytics = response.json()
+                
+                # Verify user field in response
+                if analytics.get("user") != "self":
+                    self.log_result("Expense Analytics Self User", False, 
+                                  f"User field incorrect: expected 'self', got '{analytics.get('user')}'")
+                    return False
+                
+                expense_types = analytics["expense_types"]
+                total_expenses = analytics["total_expenses"]
+                
+                # Verify percentages add up to 100%
+                total_percentage = sum(et["percentage"] for et in expense_types)
+                percentage_valid = abs(total_percentage - 100.0) < 0.1
+                
+                if percentage_valid and total_expenses > 0:
+                    self.log_result("Expense Analytics Self User", True, 
+                                  f"Total: ₹{total_expenses}, Types: {len(expense_types)}, Percentages sum: {total_percentage}%")
+                    
+                    # Log breakdown
+                    for et in expense_types:
+                        print(f"   {et['type']}: ₹{et['amount']} ({et['percentage']}%) - {et['count']} transactions")
+                    
+                    return True
+                else:
+                    self.log_result("Expense Analytics Self User", False, 
+                                  f"Invalid data - Total: ₹{total_expenses}, Percentage sum: {total_percentage}%")
+                    return False
+            else:
+                self.log_result("Expense Analytics Self User", False, f"Status: {response.status_code}", response.text)
+                return False
+        except Exception as e:
+            self.log_result("Expense Analytics Self User", False, f"Exception: {str(e)}")
+            return False
+    
+    def test_expense_type_analytics_spouse_user(self):
+        """Test expense type analytics with spouse user filtering"""
+        print("=== Testing Expense Type Analytics - Spouse User ===")
+        
+        try:
+            response = requests.get(f"{self.base_url}/analytics/expense-types/2024/1?user=spouse")
+            if response.status_code == 200:
+                analytics = response.json()
+                
+                # Verify user field in response
+                if analytics.get("user") != "spouse":
+                    self.log_result("Expense Analytics Spouse User", False, 
+                                  f"User field incorrect: expected 'spouse', got '{analytics.get('user')}'")
+                    return False
+                
+                expense_types = analytics["expense_types"]
+                total_expenses = analytics["total_expenses"]
+                
+                # Verify percentages add up to 100%
+                total_percentage = sum(et["percentage"] for et in expense_types)
+                percentage_valid = abs(total_percentage - 100.0) < 0.1
+                
+                if percentage_valid and total_expenses > 0:
+                    self.log_result("Expense Analytics Spouse User", True, 
+                                  f"Total: ₹{total_expenses}, Types: {len(expense_types)}, Percentages sum: {total_percentage}%")
+                    
+                    # Log breakdown
+                    for et in expense_types:
+                        print(f"   {et['type']}: ₹{et['amount']} ({et['percentage']}%) - {et['count']} transactions")
+                    
+                    return True
+                else:
+                    self.log_result("Expense Analytics Spouse User", False, 
+                                  f"Invalid data - Total: ₹{total_expenses}, Percentage sum: {total_percentage}%")
+                    return False
+            else:
+                self.log_result("Expense Analytics Spouse User", False, f"Status: {response.status_code}", response.text)
+                return False
+        except Exception as e:
+            self.log_result("Expense Analytics Spouse User", False, f"Exception: {str(e)}")
+            return False
+    
+    def test_data_integrity(self):
+        """Test data integrity - verify calculations are correct"""
+        print("=== Testing Data Integrity ===")
+        
+        success_count = 0
+        total_tests = 2
+        
+        # Test 1: Verify individual user totals add up to combined total
+        try:
+            # Get all users analytics
+            all_response = requests.get(f"{self.base_url}/analytics/expense-types/2024/1")
+            self_response = requests.get(f"{self.base_url}/analytics/expense-types/2024/1?user=self")
+            spouse_response = requests.get(f"{self.base_url}/analytics/expense-types/2024/1?user=spouse")
+            
+            if all([r.status_code == 200 for r in [all_response, self_response, spouse_response]]):
+                all_data = all_response.json()
+                self_data = self_response.json()
+                spouse_data = spouse_response.json()
+                
+                all_total = all_data["total_expenses"]
+                self_total = self_data["total_expenses"]
+                spouse_total = spouse_data["total_expenses"]
+                
+                # Verify totals add up
+                if abs((self_total + spouse_total) - all_total) < 0.01:
+                    self.log_result("Data Integrity - Total Verification", True, 
+                                  f"All: ₹{all_total}, Self: ₹{self_total}, Spouse: ₹{spouse_total}")
+                    success_count += 1
+                else:
+                    self.log_result("Data Integrity - Total Verification", False, 
+                                  f"Totals don't match - All: ₹{all_total}, Self+Spouse: ₹{self_total + spouse_total}")
+            else:
+                self.log_result("Data Integrity - Total Verification", False, "Failed to get analytics data")
+        except Exception as e:
+            self.log_result("Data Integrity - Total Verification", False, f"Exception: {str(e)}")
+        
+        # Test 2: Verify expense type breakdown consistency
+        try:
+            # Get self and spouse data again
+            self_response = requests.get(f"{self.base_url}/analytics/expense-types/2024/1?user=self")
+            spouse_response = requests.get(f"{self.base_url}/analytics/expense-types/2024/1?user=spouse")
+            
+            if all([r.status_code == 200 for r in [self_response, spouse_response]]):
+                self_data = self_response.json()
+                spouse_data = spouse_response.json()
+                
+                # Verify each user has the expected expense types
+                self_types = {et["type"]: et for et in self_data["expense_types"]}
+                spouse_types = {et["type"]: et for et in spouse_data["expense_types"]}
+                
+                # Expected breakdown based on our test data:
+                # Self: need=650 (500+150), want=200, investment=1000
+                # Spouse: need=300, want=250, investment=800
+                
+                integrity_valid = True
+                
+                # Check self user breakdown
+                if "need" in self_types and abs(self_types["need"]["amount"] - 650) < 0.01:
+                    pass  # Good
+                else:
+                    integrity_valid = False
+                
+                if "want" in self_types and abs(self_types["want"]["amount"] - 200) < 0.01:
+                    pass  # Good
+                else:
+                    integrity_valid = False
+                
+                if "investment" in self_types and abs(self_types["investment"]["amount"] - 1000) < 0.01:
+                    pass  # Good
+                else:
+                    integrity_valid = False
+                
+                if integrity_valid:
+                    self.log_result("Data Integrity - Breakdown Verification", True, 
+                                  "Expense type breakdowns are accurate")
+                    success_count += 1
+                else:
+                    self.log_result("Data Integrity - Breakdown Verification", False, 
+                                  "Expense type amounts don't match expected values")
+            else:
+                self.log_result("Data Integrity - Breakdown Verification", False, "Failed to get user analytics data")
+        except Exception as e:
+            self.log_result("Data Integrity - Breakdown Verification", False, f"Exception: {str(e)}")
+        
+        return success_count == total_tests
     
     def run_all_tests(self):
-        """Run all edit/delete tests"""
-        print("🚀 BACKEND EDIT/DELETE API TESTING")
+        """Run all multi-user functionality tests"""
+        print("🚀 Starting Multi-User Functionality Tests")
         print("=" * 60)
         
-        # Test API connection
-        if not self.test_api_connection():
-            print("❌ Cannot proceed - API is not accessible")
+        # Setup
+        if not self.setup_test_data():
+            print("❌ Setup failed. Cannot proceed with tests.")
             return False
         
-        # Get categories
-        categories = self.get_categories()
-        if not categories:
-            print("❌ Cannot proceed - No categories available")
-            return False
+        # Run all tests
+        test_methods = [
+            self.test_create_self_transactions,
+            self.test_create_spouse_transactions,
+            self.test_user_filtering_transactions,
+            self.test_expense_type_analytics_all_users,
+            self.test_expense_type_analytics_self_user,
+            self.test_expense_type_analytics_spouse_user,
+            self.test_data_integrity
+        ]
         
-        # Create test transactions for different test scenarios
-        print("\n📝 Creating test transactions...")
+        passed_tests = 0
+        total_tests = len(test_methods)
         
-        # Transaction for amount update test
-        transaction1 = self.create_test_transaction(categories, "Transaction for amount update test")
+        for test_method in test_methods:
+            if test_method():
+                passed_tests += 1
         
-        # Transaction for category update test  
-        transaction2 = self.create_test_transaction(categories, "Transaction for category update test")
-        
-        # Transaction for type update test
-        transaction3 = self.create_test_transaction(categories, "Transaction for type update test")
-        
-        # Transaction for description update test
-        transaction4 = self.create_test_transaction(categories, "Transaction for description update test")
-        
-        # Transaction for date update test
-        transaction5 = self.create_test_transaction(categories, "Transaction for date update test")
-        
-        # Transaction for delete test
-        transaction6 = self.create_test_transaction(categories, "Transaction for delete test")
-        
-        print("\n🔄 Testing UPDATE operations...")
-        
-        # Test all update scenarios
-        self.test_update_transaction_amount(transaction1, categories)
-        self.test_update_transaction_category(transaction2, categories)
-        self.test_update_transaction_type(transaction3, categories)
-        self.test_update_transaction_description(transaction4, categories)
-        self.test_update_transaction_date(transaction5, categories)
-        
-        print("\n❌ Testing UPDATE error cases...")
-        
-        # Test error cases
-        self.test_update_invalid_transaction_id(categories)
-        self.test_update_invalid_category_id(transaction1)
-        self.test_update_malformed_data(transaction1)
-        
-        print("\n🗑️ Testing DELETE operations...")
-        
-        # Test delete operations
-        self.test_delete_transaction(transaction6)
-        self.test_delete_invalid_transaction_id()
-        
-        # Cleanup remaining test data
-        self.cleanup_test_data()
-        
-        # Print summary
-        self.print_summary()
-        
-        return True
-    
-    def print_summary(self):
-        """Print test summary"""
-        print("\n" + "=" * 60)
+        # Summary
+        print("=" * 60)
         print("📊 TEST SUMMARY")
         print("=" * 60)
         
-        passed = sum(1 for result in self.test_results if result["success"])
-        total = len(self.test_results)
+        success_rate = (passed_tests / total_tests) * 100
+        print(f"Tests Passed: {passed_tests}/{total_tests} ({success_rate:.1f}%)")
         
-        print(f"Total Tests: {total}")
-        print(f"Passed: {passed}")
-        print(f"Failed: {total - passed}")
-        print(f"Success Rate: {(passed/total)*100:.1f}%")
+        if passed_tests == total_tests:
+            print("🎉 ALL TESTS PASSED! Multi-user functionality is working correctly.")
+        else:
+            print("⚠️  Some tests failed. Please review the issues above.")
         
-        if total - passed > 0:
-            print("\n❌ FAILED TESTS:")
-            for result in self.test_results:
-                if not result["success"]:
-                    print(f"   • {result['test']}: {result['message']}")
-        
-        print("\n" + "=" * 60)
+        return passed_tests == total_tests
 
 if __name__ == "__main__":
-    tester = BackendEditDeleteTester()
-    success = tester.run_all_tests()
-    
-    if not success:
-        sys.exit(1)
+    test_suite = MultiUserTestSuite()
+    test_suite.run_all_tests()
