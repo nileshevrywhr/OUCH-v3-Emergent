@@ -1129,9 +1129,5 @@ const styles = StyleSheet.create({
   userToggleText: {
     marginLeft: 6,
     fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 4,
-    fontSize: 12,
-    fontWeight: '600',
   },
 });
