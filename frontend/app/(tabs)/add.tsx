@@ -264,6 +264,59 @@ export default function AddExpenseScreen() {
       >
         <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
           <View style={styles.content}>
+            {/* User Selection */}
+            <View style={styles.inputContainer}>
+              <Text style={[styles.label, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                Log Expense For
+              </Text>
+              <View style={styles.userToggleContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.userToggleButton,
+                    selectedUser === 'self' && styles.userToggleButtonActive,
+                    { 
+                      backgroundColor: selectedUser === 'self' ? '#4ECDC4' : (settings.dark_mode ? '#1e1e1e' : '#f0f0f0')
+                    }
+                  ]}
+                  onPress={() => setSelectedUser('self')}
+                >
+                  <Ionicons 
+                    name="person-outline" 
+                    size={18} 
+                    color={selectedUser === 'self' ? '#fff' : (settings.dark_mode ? '#fff' : '#333')}
+                  />
+                  <Text style={[
+                    styles.userToggleText,
+                    { color: selectedUser === 'self' ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }
+                  ]}>
+                    Me
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.userToggleButton,
+                    selectedUser === 'spouse' && styles.userToggleButtonActive,
+                    { 
+                      backgroundColor: selectedUser === 'spouse' ? '#4ECDC4' : (settings.dark_mode ? '#1e1e1e' : '#f0f0f0')
+                    }
+                  ]}
+                  onPress={() => setSelectedUser('spouse')}
+                >
+                  <Ionicons 
+                    name="people-outline" 
+                    size={18} 
+                    color={selectedUser === 'spouse' ? '#fff' : (settings.dark_mode ? '#fff' : '#333')}
+                  />
+                  <Text style={[
+                    styles.userToggleText,
+                    { color: selectedUser === 'spouse' ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }
+                  ]}>
+                    Spouse
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
             {/* Date Picker */}
             <View style={styles.inputContainer}>
               <Text style={[styles.label, { color: settings.dark_mode ? '#fff' : '#333' }]}>
