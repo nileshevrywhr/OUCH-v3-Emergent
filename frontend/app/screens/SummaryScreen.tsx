@@ -115,9 +115,27 @@ export default function SummaryScreen() {
         ]}>
           {item.transaction_type === 'income' ? '+' : '-'}{formatCurrency(item.amount)}
         </Text>
-        {item.is_voice_input && (
-          <Ionicons name="mic" size={12} color="#999" style={styles.voiceIcon} />
-        )}
+        <View style={styles.transactionMeta}>
+          {/* User Tag */}
+          <View style={[
+            styles.userTag,
+            { 
+              backgroundColor: item.user === 'spouse' ? '#FF6B6B' : '#4ECDC4'
+            }
+          ]}>
+            <Ionicons 
+              name={item.user === 'spouse' ? 'people' : 'person'} 
+              size={10} 
+              color="#fff" 
+            />
+            <Text style={styles.userTagText}>
+              {item.user === 'spouse' ? 'Spouse' : 'Me'}
+            </Text>
+          </View>
+          {item.is_voice_input && (
+            <Ionicons name="mic" size={12} color="#999" style={styles.voiceIcon} />
+          )}
+        </View>
       </View>
     </View>
   );
@@ -383,8 +401,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
+  transactionMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  userTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginRight: 6,
+  },
+  userTagText: {
+    fontSize: 8,
+    color: '#fff',
+    fontWeight: '600',
+    marginLeft: 2,
+  },
   voiceIcon: {
-    marginTop: 2,
+    marginRight: 4,
   },
   emptyState: {
     alignItems: 'center',
