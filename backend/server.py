@@ -313,7 +313,7 @@ async def get_category_summary(days: int = 30):
     return {"categories": list(category_summary.values()), "period_days": days}
 
 @api_router.get("/analytics/expense-types/{year}/{month}")
-async def get_expense_type_analytics(year: int, month: int):
+async def get_expense_type_analytics(year: int, month: int, user: str = None):
     from datetime import datetime, timedelta
     import calendar
     
@@ -323,14 +323,20 @@ async def get_expense_type_analytics(year: int, month: int):
     else:
         end_date = datetime(year, month + 1, 1).date() - timedelta(days=1)
     
-    # Get expense transactions for the month
-    transactions = await db.transactions.find({
+    # Build query
+    query = {
         "transaction_date": {
             "$gte": start_date.isoformat(),
             "$lte": end_date.isoformat()
         },
         "transaction_type": "expense"
-    }).to_list(None)
+    }
+    
+    if user:
+        query["user"] = user
+    
+    # Get expense transactions for the month
+    transactions = await db.transactions.find(query).to_list(None)
     
     expense_type_breakdown = {}
     total_expenses = 0
@@ -359,7 +365,8 @@ async def get_expense_type_analytics(year: int, month: int):
         "month": month,
         "year": year,
         "total_expenses": total_expenses,
-        "expense_types": list(expense_type_breakdown.values())
+        "expense_types": list(expense_type_breakdown.values()),
+        "user": user
     }
 
 # Include the router in the main app
