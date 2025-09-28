@@ -166,8 +166,12 @@ async def delete_category(category_id: str):
 
 # Transaction endpoints
 @api_router.get("/transactions", response_model=List[Transaction])
-async def get_transactions(limit: int = 100, offset: int = 0):
-    transactions = await db.transactions.find().sort("created_at", -1).skip(offset).limit(limit).to_list(limit)
+async def get_transactions(limit: int = 100, offset: int = 0, user: str = None):
+    query = {}
+    if user:
+        query["user"] = user
+    
+    transactions = await db.transactions.find(query).sort("created_at", -1).skip(offset).limit(limit).to_list(limit)
     return [Transaction(**serialize_doc(trans)) for trans in transactions]
 
 @api_router.post("/transactions", response_model=Transaction)
