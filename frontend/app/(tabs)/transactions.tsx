@@ -781,6 +781,7 @@ const styles = StyleSheet.create({
   periodButtonText: {
     fontSize: 14,
     fontWeight: '600',
+    fontWeight: '600',
   },
   dateGroup: {
     marginBottom: 16,
@@ -799,6 +800,7 @@ const styles = StyleSheet.create({
   },
   dateTotalText: {
     fontSize: 14,
+    fontWeight: '600',
     fontWeight: '600',
   },
   transactionItem: {
@@ -883,6 +885,7 @@ const styles = StyleSheet.create({
   },
   emptySubtext: {
     fontSize: 14,
+    fontWeight: '600',
     color: '#ccc',
     marginTop: 8,
     textAlign: 'center',
@@ -948,6 +951,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: '600',
+    fontWeight: '600',
     marginLeft: 4,
   },
   // Modal styles
@@ -1006,6 +1010,7 @@ const styles = StyleSheet.create({
   },
   typeButtonText: {
     fontSize: 14,
+    fontWeight: '600',
     fontWeight: '600',
   },
   amountInput: {
@@ -1097,6 +1102,7 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     fontSize: 14,
     fontWeight: '600',
+    fontWeight: '600',
   },
   expenseTypeEditText: {
   },
@@ -1129,5 +1135,6 @@ const styles = StyleSheet.create({
   userToggleText: {
     marginLeft: 6,
     fontSize: 14,
+    fontWeight: '600',
   },
 });
