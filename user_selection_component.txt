@@ -1,0 +1,56 @@
+                )}
+
+                {/* User Selection */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                    Log Expense For
+                  </Text>
+                  <View style={styles.userToggleContainer}>
+                    <TouchableOpacity
+                      style={[
+                        styles.userToggleButton,
+                        editUser === 'self' && styles.userToggleButtonActive,
+                        { 
+                          backgroundColor: editUser === 'self' ? '#4ECDC4' : (settings.dark_mode ? '#1e1e1e' : '#f0f0f0')
+                        }
+                      ]}
+                      onPress={() => setEditUser('self')}
+                    >
+                      <Ionicons 
+                        name="person-outline" 
+                        size={18} 
+                        color={editUser === 'self' ? '#fff' : (settings.dark_mode ? '#fff' : '#333')}
+                      />
+                      <Text style={[
+                        styles.userToggleText,
+                        { color: editUser === 'self' ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }
+                      ]}>
+                        Me
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.userToggleButton,
+                        editUser === 'spouse' && styles.userToggleButtonActive,
+                        { 
+                          backgroundColor: editUser === 'spouse' ? '#4ECDC4' : (settings.dark_mode ? '#1e1e1e' : '#f0f0f0')
+                        }
+                      ]}
+                      onPress={() => setEditUser('spouse')}
+                    >
+                      <Ionicons 
+                        name="people-outline" 
+                        size={18} 
+                        color={editUser === 'spouse' ? '#fff' : (settings.dark_mode ? '#fff' : '#333')}
+                      />
+                      <Text style={[
+                        styles.userToggleText,
+                        { color: editUser === 'spouse' ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }
+                      ]}>
+                        Spouse
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                {/* Date Selection */}
