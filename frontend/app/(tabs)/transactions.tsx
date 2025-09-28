@@ -100,6 +100,7 @@ export default function TransactionsScreen() {
         description: editDescription.trim(),
         currency: settings.default_currency,
         transaction_date: editDate.toISOString().split('T')[0],
+        user: editUser,
       });
       
       Alert.alert('Success', 'Transaction updated successfully!');
