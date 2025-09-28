@@ -68,6 +68,7 @@ export default function TransactionsScreen() {
     setEditDescription(transaction.description || '');
     setEditType(transaction.transaction_type);
     setEditExpenseType(transaction.expense_type || 'need');
+    setEditUser(transaction.user || 'self');
     setEditDate(new Date(transaction.transaction_date));
     
     // Find the category
