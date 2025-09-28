@@ -34,6 +34,7 @@ export default function TransactionsScreen() {
   const [editCategory, setEditCategory] = useState<any>(null);
   const [editType, setEditType] = useState<'income' | 'expense'>('expense');
   const [editExpenseType, setEditExpenseType] = useState<'need' | 'want' | 'investment'>('need');
+  const [editUser, setEditUser] = useState<'self' | 'spouse'>('self');
   const [editDate, setEditDate] = useState(new Date());
   const [showEditDatePicker, setShowEditDatePicker] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
