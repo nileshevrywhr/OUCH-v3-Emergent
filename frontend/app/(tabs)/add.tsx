@@ -28,6 +28,7 @@ export default function AddExpenseScreen() {
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const [transactionType, setTransactionType] = useState<'income' | 'expense'>('expense');
   const [expenseType, setExpenseType] = useState<'need' | 'want' | 'investment'>('need');
+  const [selectedUser, setSelectedUser] = useState<'self' | 'spouse'>('self');
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
