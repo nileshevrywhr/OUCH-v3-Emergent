@@ -30,7 +30,7 @@
       "package": "com.bananalabs.ouchv3"
     },
     "androidStatusBar": {
-      "backgroundColor": "#000000",
+      "backgroundColor": "#1a1a1a",
       "barStyle": "light-content"
     },
     "web": {
