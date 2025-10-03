@@ -20,7 +20,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#000"
+        "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
@@ -28,6 +28,10 @@
         "android.permission.INTERNET"
       ],
       "package": "com.bananalabs.ouchv3"
+    },
+    "androidStatusBar": {
+      "backgroundColor": "#000000",
+      "barStyle": "light-content"
     },
     "web": {
       "bundler": "metro",
