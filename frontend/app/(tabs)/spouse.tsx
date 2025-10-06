@@ -394,10 +394,6 @@ export default function SpouseExpensesScreen() {
         {categorySpending.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
-                Category Spending
-              </Text>
-              
               {/* Sort Options */}
               <View style={styles.sortContainer}>
                 {(['amount', 'name', 'count'] as const).map((option) => (
