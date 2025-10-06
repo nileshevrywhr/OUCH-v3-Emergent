@@ -320,10 +320,10 @@ export default function HomeScreen() {
                 {expenseTypeData.expense_types.map((type: any, index: number) => {
                   const getTypeColor = (typeName: string) => {
                     switch (typeName) {
-                      case 'need': return '#4A90E2';      // Calm blue
-                      case 'want': return '#FF8C42';      // Vibrant orange  
-                      case 'investment': return '#4CAF50'; // Sophisticated green
-                      default: return '#999';
+                      case 'need': return '#7ED4D1';      // Pastel teal (softer version of #4ECDC4)
+                      case 'want': return '#FFB3B3';      // Pastel coral (softer version of #FF6B6B)  
+                      case 'investment': return '#8BC7E8'; // Pastel blue (softer version of #45B7D1)
+                      default: return '#D3D3D3';
                     }
                   };
 
