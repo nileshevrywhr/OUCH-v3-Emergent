@@ -160,25 +160,34 @@ async def create_category(category_data: CategoryCreate):
 
 @api_router.post("/categories/initialize-new")
 async def initialize_new_categories():
-    # Check if it's a default category
-    category = await db.categories.find_one({"id": category_id})
-    if not category:
-        raise HTTPException(status_code=404, detail="Category not found")
+    """Add new categories to existing database"""
+    new_categories = [
+        # New expense categories
+        {"name": "Gifts & Donations", "color": "#FFB3BA", "icon": "gift", "is_custom": False},
+        {"name": "Health & Fitness", "color": "#BAFFC9", "icon": "fitness", "is_custom": False},
+        {"name": "Experiences", "color": "#BAE1FF", "icon": "camera", "is_custom": False},
+        {"name": "Education", "color": "#FFFFBA", "icon": "school", "is_custom": False},
+        
+        # Income categories - User
+        {"name": "Salary", "color": "#4ECDC4", "icon": "card", "is_custom": False},
+        {"name": "Dividends", "color": "#45B7D1", "icon": "trending-up", "is_custom": False},
+        {"name": "ITR Refunds", "color": "#98D8C8", "icon": "receipt", "is_custom": False},
+        
+        # Income categories - Spouse  
+        {"name": "Modelling Shoots", "color": "#F8C471", "icon": "camera-outline", "is_custom": False},
+        {"name": "DJ Gigs", "color": "#BB8FCE", "icon": "musical-notes", "is_custom": False},
+    ]
     
-    if not category.get("is_custom", False):
-        raise HTTPException(status_code=400, detail="Cannot delete default categories")
+    added_count = 0
+    for cat_data in new_categories:
+        # Check if category already exists
+        existing = await db.categories.find_one({"name": cat_data["name"]})
+        if not existing:
+            category = Category(**cat_data)
+            await db.categories.insert_one(category.dict())
+            added_count += 1
     
-    # Delete category and update transactions
-    await db.categories.delete_one({"id": category_id})
-    # Move transactions to "Miscellaneous" category
-    misc_category = await db.categories.find_one({"name": "Miscellaneous"})
-    if misc_category:
-        await db.transactions.update_many(
-            {"category_id": category_id},
-            {"$set": {"category_id": misc_category["id"], "category_name": "Miscellaneous"}}
-        )
-    
-    return {"message": "Category deleted successfully"}
+    return {"message": f"Added {added_count} new categories"}
 
 # Transaction endpoints
 @api_router.get("/transactions", response_model=List[Transaction])
