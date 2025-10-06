@@ -320,7 +320,7 @@ export default function SpouseExpensesScreen() {
               
               {/* Sort Options */}
               <View style={styles.sortContainer}>
-                {(['amount_desc', 'amount_asc', 'name_asc', 'count_desc'] as const).map((option) => (
+                {(['amount', 'name', 'count'] as const).map((option) => (
                   <TouchableOpacity
                     key={option}
                     style={[
@@ -330,7 +330,7 @@ export default function SpouseExpensesScreen() {
                         backgroundColor: sortBy === option ? '#FF6B6B' : (settings.dark_mode ? '#1e1e1e' : '#fff')
                       }
                     ]}
-                    onPress={() => setSortBy(option)}
+                    onPress={() => handleSortPress(option)}
                   >
                     <Ionicons 
                       name={getSortIcon(option)} 
