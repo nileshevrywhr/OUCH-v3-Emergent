@@ -357,6 +357,86 @@ export default function SpouseExpensesScreen() {
           </View>
         )}
 
+        {/* Expense Type Breakdown Section for Spouse */}
+        {expenseTypeData && expenseTypeData.expense_types && expenseTypeData.expense_types.length > 0 && (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+              Expense Breakdown by Type
+            </Text>
+            <Text style={[styles.sectionSubtitle, { color: settings.dark_mode ? '#ccc' : '#666' }]}>
+              {formatCurrency(expenseTypeData.total_expenses)} total expenses (spouse only)
+            </Text>
+            
+            {/* Horizontal Progress Bar */}
+            <View style={styles.progressBarContainer}>
+              <View style={styles.progressBar}>
+                {expenseTypeData.expense_types.map((type: any, index: number) => {
+                  const getTypeColor = (typeName: string) => {
+                    switch (typeName) {
+                      case 'need': return '#4A90E2';      // Calm blue
+                      case 'want': return '#FF8C42';      // Vibrant orange  
+                      case 'investment': return '#4CAF50'; // Sophisticated green
+                      default: return '#999';
+                    }
+                  };
+
+                  return (
+                    <TouchableOpacity
+                      key={index}
+                      style={[
+                        styles.progressSegment,
+                        {
+                          backgroundColor: getTypeColor(type.type),
+                          width: `${type.percentage}%`,
+                        }
+                      ]}
+                      activeOpacity={0.8}
+                      onPress={() => {
+                        // Optional: Could add detailed breakdown modal here
+                      }}
+                    >
+                      {/* Percentage label inside segment if space allows */}
+                      {type.percentage >= 15 && (
+                        <Text style={styles.segmentLabel}>
+                          {type.percentage}%
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+              
+              {/* Labels below the progress bar */}
+              <View style={styles.labelsContainer}>
+                {expenseTypeData.expense_types.map((type: any, index: number) => {
+                  const getTypeColor = (typeName: string) => {
+                    switch (typeName) {
+                      case 'need': return '#4A90E2';
+                      case 'want': return '#FF8C42';
+                      case 'investment': return '#4CAF50';
+                      default: return '#999';
+                    }
+                  };
+
+                  return (
+                    <View key={index} style={[styles.labelItem, { flex: type.percentage }]}>
+                      <View style={styles.labelContent}>
+                        <View style={[styles.labelDot, { backgroundColor: getTypeColor(type.type) }]} />
+                        <Text style={[styles.labelText, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                          {type.percentage}% {type.type.charAt(0).toUpperCase() + type.type.slice(1)}s
+                        </Text>
+                      </View>
+                      <Text style={[styles.labelAmount, { color: settings.dark_mode ? '#ccc' : '#666' }]}>
+                        {formatCurrency(type.amount)}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+        )}
+
         {/* Recent Transactions Section */}
         {monthlyData.monthlyTransactions.length > 0 && (
           <View style={styles.section}>
