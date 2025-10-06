@@ -48,8 +48,8 @@ export default function SpouseExpensesScreen() {
     const currentMonth = currentDate.getMonth() + 1;
     const currentYear = currentDate.getFullYear();
     
-    // Note: We need to add user parameter to the API call once backend supports it
-    const data = await getExpenseTypeAnalytics(currentYear, currentMonth);
+    // Fetch spouse-specific expense type data
+    const data = await getExpenseTypeAnalytics(currentYear, currentMonth, 'spouse');
     setExpenseTypeData(data);
   };
 
