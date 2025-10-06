@@ -304,9 +304,6 @@ export default function HomeScreen() {
         {/* Expense Type Breakdown Section */}
         {expenseTypeData && expenseTypeData.expense_types && expenseTypeData.expense_types.length > 0 && (
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
-              Expense Breakdown by Type
-            </Text>
             <Text style={[styles.sectionSubtitle, { color: settings.dark_mode ? '#ccc' : '#666' }]}>
               {formatCurrency(expenseTypeData.total_expenses)} total expenses
             </Text>
