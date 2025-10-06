@@ -108,18 +108,22 @@ export default function HomeScreen() {
 
     // Apply sorting
     switch (sortBy) {
-      case 'amount_desc':
-        return sortedCategories.sort((a, b) => b.amount - a.amount);
-      case 'amount_asc':
-        return sortedCategories.sort((a, b) => a.amount - b.amount);
-      case 'name_asc':
-        return sortedCategories.sort((a, b) => a.name.localeCompare(b.name));
-      case 'count_desc':
-        return sortedCategories.sort((a, b) => b.count - a.count);
+      case 'amount':
+        return sortDirection === 'desc' 
+          ? sortedCategories.sort((a, b) => b.amount - a.amount)
+          : sortedCategories.sort((a, b) => a.amount - b.amount);
+      case 'name':
+        return sortDirection === 'desc'
+          ? sortedCategories.sort((a, b) => b.name.localeCompare(a.name))
+          : sortedCategories.sort((a, b) => a.name.localeCompare(b.name));
+      case 'count':
+        return sortDirection === 'desc'
+          ? sortedCategories.sort((a, b) => b.count - a.count)
+          : sortedCategories.sort((a, b) => a.count - b.count);
       default:
         return sortedCategories.sort((a, b) => b.amount - a.amount);
     }
-  }, [monthlyData.monthlyTransactions, sortBy]);
+  }, [monthlyData.monthlyTransactions, sortBy, sortDirection]);
 
   const formatCurrency = (amount: number) => {
     const symbol = settings.default_currency === 'INR' ? '₹' : '$';
