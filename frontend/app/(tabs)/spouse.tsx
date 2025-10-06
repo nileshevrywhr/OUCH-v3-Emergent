@@ -610,4 +610,55 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
+  // Progress Bar Styles
+  progressBarContainer: {
+    marginTop: 8,
+  },
+  progressBar: {
+    flexDirection: 'row',
+    height: 32,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#f0f0f0',
+    marginBottom: 16,
+  },
+  progressSegment: {
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 2, // Ensure very small segments are still visible
+  },
+  segmentLabel: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  labelsContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  labelItem: {
+    minWidth: 0, // Allow flex to work properly
+  },
+  labelContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  labelDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  labelText: {
+    fontSize: 12,
+    fontWeight: '500',
+    flex: 1,
+  },
+  labelAmount: {
+    fontSize: 11,
+    fontWeight: '400',
+  },
 });
