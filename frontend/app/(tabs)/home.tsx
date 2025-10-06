@@ -274,9 +274,6 @@ export default function HomeScreen() {
       >
         <View style={styles.header}>
           <Text style={[styles.headerTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
-            This Month
-          </Text>
-          <Text style={[styles.headerSubtitle, { color: settings.dark_mode ? '#ccc' : '#666' }]}>
             {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           </Text>
         </View>
