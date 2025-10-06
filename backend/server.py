@@ -160,7 +160,28 @@ async def create_category(category_data: CategoryCreate):
 
 @api_router.post("/categories/initialize-new")
 async def initialize_new_categories():
-    """Add new categories to existing database"""
+    """Add new categories and fix existing icon names"""
+    
+    # First, update existing categories with proper icon names
+    icon_updates = {
+        "plane": "airplane",
+        "shopping-cart": "basket", 
+        "utensils": "restaurant",
+        "zap": "flash",
+        "home": "home-outline",  # Update the second home to home-outline
+        "scissors": "cut",
+        "more-horizontal": "ellipsis-horizontal"
+    }
+    
+    updated_icons = 0
+    for old_icon, new_icon in icon_updates.items():
+        result = await db.categories.update_many(
+            {"icon": old_icon},
+            {"$set": {"icon": new_icon}}
+        )
+        updated_icons += result.modified_count
+    
+    # Now add new categories
     new_categories = [
         # New expense categories
         {"name": "Gifts & Donations", "color": "#FFB3BA", "icon": "gift", "is_custom": False},
@@ -187,7 +208,11 @@ async def initialize_new_categories():
             await db.categories.insert_one(category.dict())
             added_count += 1
     
-    return {"message": f"Added {added_count} new categories"}
+    return {
+        "message": f"Added {added_count} new categories and updated {updated_icons} icon names",
+        "icons_updated": updated_icons,
+        "categories_added": added_count
+    }
 
 # Transaction endpoints
 @api_router.get("/transactions", response_model=List[Transaction])
