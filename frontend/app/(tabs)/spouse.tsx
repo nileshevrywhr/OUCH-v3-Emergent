@@ -310,53 +310,6 @@ export default function SpouseExpensesScreen() {
           </View>
         </View>
 
-        {/* Category Spending Section */}
-        {categorySpending.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
-                Category Spending
-              </Text>
-              
-              {/* Sort Options */}
-              <View style={styles.sortContainer}>
-                {(['amount', 'name', 'count'] as const).map((option) => (
-                  <TouchableOpacity
-                    key={option}
-                    style={[
-                      styles.sortButton,
-                      sortBy === option && styles.sortButtonActive,
-                      { 
-                        backgroundColor: sortBy === option ? '#FF6B6B' : (settings.dark_mode ? '#1e1e1e' : '#fff')
-                      }
-                    ]}
-                    onPress={() => handleSortPress(option)}
-                  >
-                    <Ionicons 
-                      name={getSortIcon(option)} 
-                      size={14} 
-                      color={sortBy === option ? '#fff' : (settings.dark_mode ? '#fff' : '#333')} 
-                    />
-                    <Text style={[
-                      styles.sortButtonText,
-                      { color: sortBy === option ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }
-                    ]}>
-                      {getSortLabel(option)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            <FlatList
-              data={categorySpending}
-              renderItem={renderCategoryItem}
-              keyExtractor={(item) => item.name}
-              scrollEnabled={false}
-            />
-          </View>
-        )}
-
         {/* Expense Type Breakdown Section for Spouse */}
         {expenseTypeData && expenseTypeData.expense_types && expenseTypeData.expense_types.length > 0 && (
           <View style={styles.section}>
@@ -434,6 +387,53 @@ export default function SpouseExpensesScreen() {
                 })}
               </View>
             </View>
+          </View>
+        )}
+
+        {/* Category Spending Section */}
+        {categorySpending.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionTitle, { color: settings.dark_mode ? '#fff' : '#333' }]}>
+                Category Spending
+              </Text>
+              
+              {/* Sort Options */}
+              <View style={styles.sortContainer}>
+                {(['amount', 'name', 'count'] as const).map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.sortButton,
+                      sortBy === option && styles.sortButtonActive,
+                      { 
+                        backgroundColor: sortBy === option ? '#FF6B6B' : (settings.dark_mode ? '#1e1e1e' : '#fff')
+                      }
+                    ]}
+                    onPress={() => handleSortPress(option)}
+                  >
+                    <Ionicons 
+                      name={getSortIcon(option)} 
+                      size={14} 
+                      color={sortBy === option ? '#fff' : (settings.dark_mode ? '#fff' : '#333')} 
+                    />
+                    <Text style={[
+                      styles.sortButtonText,
+                      { color: sortBy === option ? '#fff' : (settings.dark_mode ? '#fff' : '#333') }
+                    ]}>
+                      {getSortLabel(option)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <FlatList
+              data={categorySpending}
+              renderItem={renderCategoryItem}
+              keyExtractor={(item) => item.name}
+              scrollEnabled={false}
+            />
           </View>
         )}
 
@@ -527,6 +527,57 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 4,
     marginBottom: 16,
+  },
+  // Progress Bar Styles
+  progressBarContainer: {
+    marginTop: 8,
+  },
+  progressBar: {
+    flexDirection: 'row',
+    height: 32,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#f0f0f0',
+    marginBottom: 16,
+  },
+  progressSegment: {
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 2, // Ensure very small segments are still visible
+  },
+  segmentLabel: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  labelsContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  labelItem: {
+    minWidth: 0, // Allow flex to work properly
+  },
+  labelContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  labelDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  labelText: {
+    fontSize: 12,
+    fontWeight: '500',
+    flex: 1,
+  },
+  labelAmount: {
+    fontSize: 11,
+    fontWeight: '400',
   },
   transactionItem: {
     flexDirection: 'row',
@@ -689,56 +740,5 @@ const styles = StyleSheet.create({
   categoryAmount: {
     fontSize: 16,
     fontWeight: '700',
-  },
-  // Progress Bar Styles
-  progressBarContainer: {
-    marginTop: 8,
-  },
-  progressBar: {
-    flexDirection: 'row',
-    height: 32,
-    borderRadius: 16,
-    overflow: 'hidden',
-    backgroundColor: '#f0f0f0',
-    marginBottom: 16,
-  },
-  progressSegment: {
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minWidth: 2, // Ensure very small segments are still visible
-  },
-  segmentLabel: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  labelsContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  labelItem: {
-    minWidth: 0, // Allow flex to work properly
-  },
-  labelContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  labelDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
-  },
-  labelText: {
-    fontSize: 12,
-    fontWeight: '500',
-    flex: 1,
-  },
-  labelAmount: {
-    fontSize: 11,
-    fontWeight: '400',
   },
 });
