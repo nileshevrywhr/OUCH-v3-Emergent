@@ -47,7 +47,7 @@ export const AppContext = React.createContext<{
   updateTransaction: (id: string, transaction: Partial<Transaction>) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
   updateSettings: (newSettings: Partial<AppSettings>) => Promise<void>;
-  getExpenseTypeAnalytics: (year: number, month: number) => Promise<any>;
+  getExpenseTypeAnalytics: (year: number, month: number, user?: string) => Promise<any>;
 }>({
   transactions: [],
   categories: [],
