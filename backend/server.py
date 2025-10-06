@@ -188,6 +188,8 @@ async def initialize_new_categories():
         {"name": "Health & Fitness", "color": "#BAFFC9", "icon": "fitness", "is_custom": False},
         {"name": "Experiences", "color": "#BAE1FF", "icon": "camera", "is_custom": False},
         {"name": "Education", "color": "#FFFFBA", "icon": "school", "is_custom": False},
+        {"name": "Shopping", "color": "#E6B3FF", "icon": "bag", "is_custom": False},
+        {"name": "Bills", "color": "#FFD6B3", "icon": "document-text", "is_custom": False},
         
         # Income categories - User
         {"name": "Salary", "color": "#4ECDC4", "icon": "card", "is_custom": False},
