@@ -358,10 +358,10 @@ export default function HomeScreen() {
                 {expenseTypeData.expense_types.map((type: any, index: number) => {
                   const getTypeColor = (typeName: string) => {
                     switch (typeName) {
-                      case 'need': return '#4A90E2';
-                      case 'want': return '#FF8C42';
-                      case 'investment': return '#4CAF50';
-                      default: return '#999';
+                      case 'need': return '#7ED4D1';
+                      case 'want': return '#FFB3B3';
+                      case 'investment': return '#8BC7E8';
+                      default: return '#D3D3D3';
                     }
                   };
 
