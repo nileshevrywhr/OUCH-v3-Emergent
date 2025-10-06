@@ -97,16 +97,32 @@ async def initialize_default_categories():
     existing_categories = await db.categories.count_documents({})
     if existing_categories == 0:
         default_categories = [
+            # Existing expense categories
             {"name": "Rent", "color": "#FF6B6B", "icon": "home", "is_custom": False},
             {"name": "EMI", "color": "#4ECDC4", "icon": "credit-card", "is_custom": False},
-            {"name": "Travel", "color": "#45B7D1", "icon": "plane", "is_custom": False},
-            {"name": "Groceries", "color": "#FFA07A", "icon": "shopping-cart", "is_custom": False},
-            {"name": "Eating Out", "color": "#98D8C8", "icon": "utensils", "is_custom": False},
-            {"name": "Utilities", "color": "#F7DC6F", "icon": "zap", "is_custom": False},
+            {"name": "Travel", "color": "#45B7D1", "icon": "airplane", "is_custom": False},
+            {"name": "Groceries", "color": "#FFA07A", "icon": "basket", "is_custom": False},
+            {"name": "Eating Out", "color": "#98D8C8", "icon": "restaurant", "is_custom": False},
+            {"name": "Utilities", "color": "#F7DC6F", "icon": "flash", "is_custom": False},
             {"name": "Transport", "color": "#BB8FCE", "icon": "car", "is_custom": False},
-            {"name": "Household", "color": "#85C1E9", "icon": "home", "is_custom": False},
-            {"name": "Grooming & PC", "color": "#F8C471", "icon": "scissors", "is_custom": False},
-            {"name": "Miscellaneous", "color": "#D5A6BD", "icon": "more-horizontal", "is_custom": False}
+            {"name": "Household", "color": "#85C1E9", "icon": "home-outline", "is_custom": False},
+            {"name": "Grooming & PC", "color": "#F8C471", "icon": "cut", "is_custom": False},
+            {"name": "Miscellaneous", "color": "#D5A6BD", "icon": "ellipsis-horizontal", "is_custom": False},
+            
+            # New expense categories
+            {"name": "Gifts & Donations", "color": "#FFB3BA", "icon": "gift", "is_custom": False},
+            {"name": "Health & Fitness", "color": "#BAFFC9", "icon": "fitness", "is_custom": False},
+            {"name": "Experiences", "color": "#BAE1FF", "icon": "camera", "is_custom": False},
+            {"name": "Education", "color": "#FFFFBA", "icon": "school", "is_custom": False},
+            
+            # Income categories - User
+            {"name": "Salary", "color": "#4ECDC4", "icon": "card", "is_custom": False},
+            {"name": "Dividends", "color": "#45B7D1", "icon": "trending-up", "is_custom": False},
+            {"name": "ITR Refunds", "color": "#98D8C8", "icon": "receipt", "is_custom": False},
+            
+            # Income categories - Spouse  
+            {"name": "Modelling Shoots", "color": "#F8C471", "icon": "camera-outline", "is_custom": False},
+            {"name": "DJ Gigs", "color": "#BB8FCE", "icon": "musical-notes", "is_custom": False},
         ]
         
         for cat_data in default_categories:
