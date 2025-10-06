@@ -158,8 +158,8 @@ async def create_category(category_data: CategoryCreate):
     result = await db.categories.insert_one(category.dict())
     return category
 
-@api_router.delete("/categories/{category_id}")
-async def delete_category(category_id: str):
+@api_router.post("/categories/initialize-new")
+async def initialize_new_categories():
     # Check if it's a default category
     category = await db.categories.find_one({"id": category_id})
     if not category:
