@@ -1,6 +1,24 @@
-# Welcome to your Expo app 👋
+# OUCH - Overpriced Utilities & Costly Habits 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Your Smart Expense Tracking Companion**
+
+OUCH is a comprehensive expense tracking mobile app built with Expo and React Native that helps you monitor your spending habits, categorize expenses, and make informed financial decisions.
+
+## Features
+
+- 📊 **Multi-User Support**: Track expenses for yourself and your spouse separately
+- 💰 **Expense Type Analytics**: Categorize spending as Needs, Wants, or Investments with visual breakdowns  
+- 📱 **21 Categories**: Comprehensive categorization from groceries to investments
+- 🎨 **Beautiful UI**: Modern design with dark mode support
+- 🔄 **Real-Time Sync**: Instant updates across all screens
+- 📈 **Visual Analytics**: Progress bars and charts for expense insights
+
+## Tech Stack
+
+- **Frontend**: Expo (React Native), TypeScript
+- **Backend**: FastAPI (Python), MongoDB
+- **State Management**: React Context API
+- **UI Components**: React Native with Ionicons
 
 ## Get started
 
