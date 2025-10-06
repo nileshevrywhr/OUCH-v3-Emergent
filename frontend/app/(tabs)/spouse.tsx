@@ -31,7 +31,8 @@ const getColorForCategory = (categoryName: string): string => {
 export default function SpouseExpensesScreen() {
   const { transactions, refreshData, settings, getExpenseTypeAnalytics } = useContext(AppContext);
   const [refreshing, setRefreshing] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>('amount_desc');
+  const [sortBy, setSortBy] = useState<SortOption>('amount');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [expenseTypeData, setExpenseTypeData] = useState<any>(null);
 
   const onRefresh = async () => {
