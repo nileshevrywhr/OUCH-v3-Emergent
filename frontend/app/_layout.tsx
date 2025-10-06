@@ -198,9 +198,14 @@ export default function RootLayout() {
     }
   };
 
-  const getExpenseTypeAnalytics = async (year: number, month: number) => {
+  const getExpenseTypeAnalytics = async (year: number, month: number, user?: string) => {
     try {
-      const response = await fetch(`${EXPO_PUBLIC_BACKEND_URL}/api/analytics/expense-types/${year}/${month}`);
+      let url = `${EXPO_PUBLIC_BACKEND_URL}/api/analytics/expense-types/${year}/${month}`;
+      if (user) {
+        url += `?user=${user}`;
+      }
+      
+      const response = await fetch(url);
       if (response.ok) {
         return await response.json();
       } else {
@@ -212,7 +217,8 @@ export default function RootLayout() {
         month,
         year,
         total_expenses: 0,
-        expense_types: []
+        expense_types: [],
+        user: user || 'all'
       };
     }
   };
