@@ -12,7 +12,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { AppContext } from '../_layout';
 
-type SortOption = 'amount_desc' | 'amount_asc' | 'name_asc' | 'count_desc';
+type SortOption = 'amount' | 'name' | 'count';
+type SortDirection = 'asc' | 'desc';
 
 // Move the color function outside the component to avoid re-creation
 const getColorForCategory = (categoryName: string): string => {
