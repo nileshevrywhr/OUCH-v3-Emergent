@@ -131,28 +131,49 @@ export default function HomeScreen() {
   };
 
   const getSortIcon = (option: SortOption) => {
+    const isActive = sortBy === option;
+    if (!isActive) {
+      // Show base icon when not active
+      switch (option) {
+        case 'amount': return 'swap-vertical-outline';
+        case 'name': return 'text-outline';
+        case 'count': return 'bar-chart-outline';
+      }
+    }
+    
+    // Show directional icon when active
     switch (option) {
-      case 'amount_desc':
-        return 'trending-down';
-      case 'amount_asc':
-        return 'trending-up';
-      case 'name_asc':
-        return 'text-outline';
-      case 'count_desc':
-        return 'bar-chart-outline';
+      case 'amount':
+        return sortDirection === 'desc' ? 'trending-down' : 'trending-up';
+      case 'name':
+        return sortDirection === 'desc' ? 'arrow-down' : 'arrow-up';
+      case 'count':
+        return sortDirection === 'desc' ? 'bar-chart' : 'bar-chart-outline';
     }
   };
 
   const getSortLabel = (option: SortOption) => {
-    switch (option) {
-      case 'amount_desc':
-        return 'Amount ↓';
-      case 'amount_asc':
-        return 'Amount ↑';
-      case 'name_asc':
-        return 'Name A-Z';
-      case 'count_desc':
-        return 'Frequency';
+    const baseLabels = {
+      amount: 'Amount',
+      name: 'Name',
+      count: 'Frequency'
+    };
+    
+    if (sortBy !== option) {
+      return baseLabels[option];
+    }
+    
+    return `${baseLabels[option]} ${sortDirection === 'desc' ? '↓' : '↑'}`;
+  };
+
+  const handleSortPress = (option: SortOption) => {
+    if (sortBy === option) {
+      // Toggle direction if same option
+      setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc');
+    } else {
+      // Switch to new option with desc as default
+      setSortBy(option);
+      setSortDirection('desc');
     }
   };
 
